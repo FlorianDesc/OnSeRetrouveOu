@@ -1,7 +1,10 @@
-import React from 'react'
+import { Button } from "./components/ui/button";
 
 export default function App() {
   return (
-    <div>App</div>
-  )
+    <div className="text-red-500">
+      <Button>test</Button>
+      App
+    </div>
+  );
 }
