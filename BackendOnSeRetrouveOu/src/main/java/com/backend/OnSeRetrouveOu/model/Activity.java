@@ -1,10 +1,19 @@
 package com.backend.OnSeRetrouveOu.model;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
 @Entity
 @Table(name = "activities")
 public class Activity {
@@ -31,32 +40,4 @@ public class Activity {
 
     @Column(name = "max_participants")
     private Integer maxParticipants;
-
-    public Activity() {}
-
-    public Activity(String title, String description, String location,
-                    LocalDate dateActivity, User creator, Integer maxParticipants) {
-        this.title = title;
-        this.description = description;
-        this.location = location;
-        this.dateActivity = dateActivity;
-        this.creator = creator;
-        this.maxParticipants = maxParticipants;
-    }
-
-    public Long getId() { return id; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public String getLocation() { return location; }
-    public LocalDate getDateActivity() { return dateActivity; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public User getCreator() { return creator; }
-    public Integer getMaxParticipants() { return maxParticipants; }
-
-    public void setTitle(String title) { this.title = title; }
-    public void setDescription(String description) { this.description = description; }
-    public void setLocation(String location) { this.location = location; }
-    public void setDateActivity(LocalDate dateActivity) { this.dateActivity = dateActivity; }
-    public void setCreator(User creator) { this.creator = creator; }
-    public void setMaxParticipants(Integer maxParticipants) { this.maxParticipants = maxParticipants; }
 }

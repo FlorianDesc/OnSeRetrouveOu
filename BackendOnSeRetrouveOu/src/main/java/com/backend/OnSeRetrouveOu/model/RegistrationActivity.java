@@ -1,9 +1,19 @@
 package com.backend.OnSeRetrouveOu.model;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.Data;
+
+@Data
 @Entity
 @Table(
         name = "registrations_activities",
@@ -24,19 +34,4 @@ public class RegistrationActivity {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    public RegistrationActivity() {}
-
-    public RegistrationActivity(Activity activity, User user) {
-        this.activity = activity;
-        this.user = user;
-    }
-
-    public Long getId() { return id; }
-    public Activity getActivity() { return activity; }
-    public User getUser() { return user; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
-    public void setActivity(Activity activity) { this.activity = activity; }
-    public void setUser(User user) { this.user = user; }
 }

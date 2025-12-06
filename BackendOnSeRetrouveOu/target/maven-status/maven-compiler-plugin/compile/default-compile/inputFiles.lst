@@ -1,1 +1,15 @@
-/Users/floriandeschambres/Documents/COURS/M1/PROJET/On se retrouve ou/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/OnSeRetrouveOuApplication.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/OnSeRetrouveOuApplication.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/config/JwtUtils.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/config/SecurityConfig.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/ActivityController.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/AuthController.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/HelloController.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/filter/JwtFilter.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/model/Activity.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/model/RegistrationActivity.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/model/User.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/repository/ActivityRepository.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/repository/RegistrationActivityRepository.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/repository/UserRepository.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/service/ActivityService.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/service/CustomUserDetailsService.java
