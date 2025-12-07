@@ -1,1 +1,10 @@
+com/backend/OnSeRetrouveOu/repository/ActivityRepository.class
+com/backend/OnSeRetrouveOu/controller/ActivityController.class
+com/backend/OnSeRetrouveOu/service/ActivityService.class
 com/backend/OnSeRetrouveOu/OnSeRetrouveOuApplication.class
+com/backend/OnSeRetrouveOu/model/User.class
+com/backend/OnSeRetrouveOu/model/RegistrationActivity.class
+com/backend/OnSeRetrouveOu/model/Activity.class
+com/backend/OnSeRetrouveOu/repository/UserRepository.class
+com/backend/OnSeRetrouveOu/controller/HelloController.class
+com/backend/OnSeRetrouveOu/repository/RegistrationActivityRepository.class
