@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
   
   private final CustomUserDetailsService customUserDetailsService;
-  private final JwtUtils jwtUtils;
 
   @Bean 
   public PasswordEncoder passwordEncoder() {
