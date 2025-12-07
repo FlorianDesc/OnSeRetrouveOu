@@ -1,16 +1,28 @@
-import ActivityCard from "@/features/activity/ActivityCard";
+import SearchBar from "@/components/SearchBar";
+import { Spinner } from "@/components/ui/spinner";
+import ActivityCardList from "@/features/activity/ActivityCardList";
+import { Suspense, useState } from "react";
 
 export default function Activity() {
-  // const {data: activities} = useSuspenseQuery('activities', fetchActivities);
+  const [search, setSearch] = useState("");
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Liste des activités</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ActivityCard />
-        <ActivityCard />
-        <ActivityCard />
-      </div>
+      <Suspense
+        fallback={
+          <div className="fixed inset-0 flex justify-center items-center">
+            <Spinner className="size-7 text-gray-700" />
+          </div>
+        }>
+        <div className="mb-6">
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher une activité"
+          />
+        </div>
+        <ActivityCardList />
+      </Suspense>
     </div>
   );
 }

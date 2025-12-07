@@ -49,22 +49,24 @@ export default function NavBar() {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <Link to="/">
-                    <NavigationMenuLink
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/"
                       className={navigationMenuTriggerStyle()}
-                      active={location.pathname === "/"}>
+                      data-active={location.pathname === "/"}>
                       Activités
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/profile">
-                    <NavigationMenuLink
+                  <NavigationMenuLink asChild>
+                    <Link
+                      to="/profile"
                       className={navigationMenuTriggerStyle()}
-                      active={location.pathname === "/profile"}>
+                      data-active={location.pathname === "/profile"}>
                       Profil
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
