@@ -41,15 +41,25 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody User user) {
+  public ResponseEntity<?> login(@RequestBody User user, jakarta.servlet.http.HttpServletResponse response) {
     try {
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
               user.getUsername(), user.getPassword()));
       if (authentication.isAuthenticated()) {
+        String token = jwtUtils.generateToken(user.getUsername());
+        
+        // Créer un cookie HttpOnly
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Mettre true en production avec HTTPS
+        cookie.setPath("/");
+        cookie.setMaxAge(900); // 15 minutes (900 secondes)
+        response.addCookie(cookie);
+        
         Map<String, Object> authData = new HashMap<>();
-        authData.put("token", jwtUtils.generateToken(user.getUsername()));
-        authData.put("type", "Bearer");
+        authData.put("success", true);
+        authData.put("message", "Connexion réussie");
         return ResponseEntity.ok(authData);
       }
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");

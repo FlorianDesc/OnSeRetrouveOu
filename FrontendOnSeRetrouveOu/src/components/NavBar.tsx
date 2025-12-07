@@ -6,14 +6,28 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function NavBar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, getToken } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogout = () => {
-    // Logique de déconnexion à implémenter
-    console.log("Déconnexion");
+  useEffect(() => {
+    setIsAuthenticated(!!getToken());
+  }, [location]);
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      logout();
+      setIsAuthenticated(false);
+      navigate("/login");
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
@@ -39,15 +53,6 @@ export default function NavBar() {
                     <NavigationMenuLink
                       className={navigationMenuTriggerStyle()}
                       active={location.pathname === "/"}>
-                      Accueil
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Link to="/activities">
-                    <NavigationMenuLink
-                      className={navigationMenuTriggerStyle()}
-                      active={location.pathname === "/activities"}>
                       Activités
                     </NavigationMenuLink>
                   </Link>
@@ -65,10 +70,10 @@ export default function NavBar() {
             </NavigationMenu>
           </div>
 
-          {/* Bouton de déconnexion - À droite */}
+          {/* Bouton de connexion/déconnexion - À droite */}
           <div className="flex justify-end">
-            <Button onClick={handleLogout} variant="outline">
-              Déconnexion
+            <Button onClick={handleAuthAction} variant="outline">
+              {isAuthenticated ? "Déconnexion" : "Connexion"}
             </Button>
           </div>
         </div>
