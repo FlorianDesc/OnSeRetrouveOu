@@ -1,14 +1,34 @@
 import defaultImg from "@/assets/default-picture.jpg";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import type { Activity } from "@/types/activity";
-import { Calendar, MapPin, User, Users } from "lucide-react";
+import type { User } from "@/types/user";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, MapPin, User as UserIcon, Users } from "lucide-react";
+import { useState } from "react";
+import { fetchActivityParticipants } from "./api/activityApi";
 import { activityImages } from "./constants/activityImages";
 
 type ActivityCardProps = {
   activity: Activity;
+  currentUser?: User;
 };
 
-export default function ActivityCard({ activity }: ActivityCardProps) {
+export default function ActivityCard({
+  activity,
+  currentUser,
+}: ActivityCardProps) {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   const formattedDate = new Date(activity.dateActivity).toLocaleDateString(
     "fr-FR",
     {
@@ -19,12 +39,26 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
   );
 
   const activityImage = activityImages[activity.id] || defaultImg;
+  const isCreator = currentUser && activity.creator?.id === currentUser.id;
+
+  const { data: participants, isLoading: participantsLoading } = useQuery({
+    queryKey: ["participants", activity.id],
+    queryFn: () => fetchActivityParticipants(activity.id),
+    enabled: isSheetOpen,
+  });
+
+  const participantList = participants || [];
+
+  const getInitial = (user: User) => {
+    const fallback = user.firstname?.[0] || user.lastname?.[0] || "?";
+    return (user.username?.[0] || fallback || "?").toUpperCase();
+  };
 
   return (
     <Card className="w-full overflow-hidden p-0">
       <div className="flex flex-row h-full">
         {activityImage && (
-          <div className="w-[35%]">
+          <div className="w-[30%]">
             <img
               src={activityImage}
               alt={activity.title}
@@ -32,39 +66,98 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
             />
           </div>
         )}
-        <div className="flex flex-col w-[65%] py-6">
+        <div className="flex flex-col w-[70%] py-4 h-full">
           <CardHeader className="pb-0">
             <CardTitle className="text-xl font-semibold">
               {activity.title}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-0 pt-0">
-            <p className="text-sm text-gray-600 mb-3">{activity.description}</p>
+          <CardContent className="space-y-0 pt-0 flex flex-col h-full">
+            <div className="flex-1 flex flex-col justify-start">
+              <p className="text-sm text-gray-600 mb-3">
+                {activity.description}
+              </p>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4" />
-                <span>{activity.location}</span>
-              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
+                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
+                  <MapPin className="size-4" />
+                  {activity.location}
+                </span>
+                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
+                  <Calendar className="size-4" />
+                  {formattedDate}
+                </span>
 
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4" />
-                <span>{formattedDate}</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
-                <span>
+                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
+                  <UserIcon className="size-4" />
                   Créé par {activity.creator.firstname}{" "}
                   {activity.creator.lastname}
                 </span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="h-4 w-4" />
-                <span>{activity.maxParticipants} participants</span>
+                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
+                  <Users className="size-4" />
+                  {activity.maxParticipants} participants
+                </span>
               </div>
             </div>
+
+            {!isCreator && (
+              <div className="mt-6 w-full flex flex-row flex-wrap gap-3 items-end">
+                <Button className="flex-[0.65] min-w-[100px]" variant="default">
+                  S'inscrire
+                </Button>
+
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                  <SheetTrigger asChild>
+                    <Button className="flex-1 min-w-[140px]" variant="outline">
+                      Voir les participants
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right">
+                    <SheetHeader>
+                      <SheetTitle>Participants</SheetTitle>
+                      <p className="text-sm text-gray-600">
+                        {participantList.length} participant(s)
+                      </p>
+                    </SheetHeader>
+                    <div className="px-4 pb-4 space-y-0 overflow-y-auto">
+                      {participantsLoading && (
+                        <p className="text-sm text-gray-600">Chargement...</p>
+                      )}
+
+                      {!participantsLoading && participantList.length === 0 && (
+                        <p className="text-sm text-gray-600">
+                          Aucun participant pour le moment
+                        </p>
+                      )}
+
+                      {!participantsLoading &&
+                        participantList.map((participant, index) => (
+                          <div key={participant.id}>
+                            <div className="flex items-center gap-3 px-1 py-1.5">
+                              <Avatar>
+                                <AvatarFallback>
+                                  {getInitial(participant)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium">
+                                  {participant.firstname} {participant.lastname}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {participant.username}
+                                </span>
+                              </div>
+                            </div>
+                            {index < participantList.length - 1 && (
+                              <Separator className="my-2 bg-gray-200" />
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            )}
           </CardContent>
         </div>
       </div>

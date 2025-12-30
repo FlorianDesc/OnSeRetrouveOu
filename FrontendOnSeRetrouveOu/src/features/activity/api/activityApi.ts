@@ -1,4 +1,5 @@
 import type { Activity } from "@/types/activity";
+import type { User } from "@/types/user";
 import type { CreateActivityFormData } from "../schemas/activitySchema";
 
 const API_URL = "http://localhost:8080/api/activities";
@@ -61,6 +62,35 @@ export const createActivity = async (
 
   if (!response.ok) {
     throw new Error("Erreur lors de la création de l'activité");
+  }
+
+  return response.json();
+};
+
+export const fetchActivityParticipants = async (
+  activityId: number
+): Promise<User[]> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}/participants`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération des participants");
   }
 
   return response.json();
