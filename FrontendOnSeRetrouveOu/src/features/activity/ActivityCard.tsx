@@ -1,3 +1,4 @@
+import defaultImg from "@/assets/default-picture.jpg";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Activity } from "@/types/activity";
 import { Calendar, MapPin, User, Users } from "lucide-react";
@@ -17,7 +18,7 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
     }
   );
 
-  const activityImage = activityImages[activity.id];
+  const activityImage = activityImages[activity.id] || defaultImg;
 
   return (
     <Card className="w-full overflow-hidden p-0">

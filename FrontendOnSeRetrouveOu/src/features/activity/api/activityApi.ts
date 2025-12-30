@@ -1,4 +1,5 @@
 import type { Activity } from "@/types/activity";
+import type { CreateActivityFormData } from "../schemas/activitySchema";
 
 const API_URL = "http://localhost:8080/api/activities";
 
@@ -31,6 +32,35 @@ export const fetchActivities = async (
 
   if (!response.ok) {
     throw new Error("Erreur lors de la récupération des activités");
+  }
+
+  return response.json();
+};
+
+export const createActivity = async (
+  data: CreateActivityFormData
+): Promise<Activity> => {
+  const token = localStorage.getItem("token");
+
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la création de l'activité");
   }
 
   return response.json();
