@@ -1,13 +1,13 @@
 package com.backend.OnSeRetrouveOu.controller;
 
-import com.backend.OnSeRetrouveOu.model.Activity;
-import com.backend.OnSeRetrouveOu.repository.ActivityRepository;
-import com.backend.OnSeRetrouveOu.service.ActivityService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.backend.OnSeRetrouveOu.model.Activity;
+import com.backend.OnSeRetrouveOu.service.ActivityService;
 
 @RestController
 @RequestMapping("/api/activities")
@@ -20,7 +20,10 @@ public class ActivityController {
     }
 
     @GetMapping
-    public List<Activity> getAllActivies() {
-        return activityService.getAllActivities();
+    public Page<Activity> getAllActivies(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return activityService.getAllActivities(page, size);
     }
 }

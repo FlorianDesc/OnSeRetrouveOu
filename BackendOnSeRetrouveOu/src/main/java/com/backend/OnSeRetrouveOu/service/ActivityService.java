@@ -1,7 +1,8 @@
 package com.backend.OnSeRetrouveOu.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.backend.OnSeRetrouveOu.model.Activity;
@@ -15,7 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class ActivityService {
     private final ActivityRepository activityRepository;
 
-    public List<Activity> getAllActivities(){
-        return activityRepository.findAll();
+    public Page<Activity> getAllActivities(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return activityRepository.findAll(pageable);
     }
 }
