@@ -40,7 +40,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
     return http
       .csrf(AbstractHttpConfigurer::disable)
-      .cors(cors -> cors.disable())
+      .cors(cors -> cors.configure(http))
       .authorizeHttpRequests(auth -> auth
         .requestMatchers("/api/auth/**", "/hello").permitAll()
         .anyRequest().authenticated()

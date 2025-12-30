@@ -1,4 +1,5 @@
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/OnSeRetrouveOuApplication.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/config/CorsConfig.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/config/JwtUtils.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/config/SecurityConfig.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/ActivityController.java
