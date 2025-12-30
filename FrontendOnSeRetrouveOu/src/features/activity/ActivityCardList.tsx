@@ -4,24 +4,20 @@ import { useEffect, useState } from "react";
 import ActivityCard from "./ActivityCard";
 import { fetchActivities } from "./api/activityApi";
 
-const ITEMS_PER_PAGE = 10;
-
 export default function ActivityCardList() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [currentPage]);
 
-  const { data: activities } = useSuspenseQuery({
-    queryKey: ["activities"],
-    queryFn: fetchActivities,
+  const { data } = useSuspenseQuery({
+    queryKey: ["activities", currentPage],
+    queryFn: () => fetchActivities(currentPage, 10),
   });
 
-  const totalPages = Math.ceil(activities.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentActivities = activities.slice(startIndex, endIndex);
+  const totalPages = data.totalPages;
+  const currentActivities = data.content;
 
   return (
     <div className="space-y-6">
@@ -36,38 +32,38 @@ export default function ActivityCardList() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}>
+            onClick={() => setCurrentPage(0)}
+            disabled={currentPage === 0}>
             &lt;&lt;
           </Button>
 
-          {currentPage > 1 && (
+          {currentPage > 0 && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentPage(currentPage - 1)}>
-              {currentPage - 1}
+              {currentPage}
             </Button>
           )}
 
           <Button variant="default" size="icon" className="pointer-events-none">
-            {currentPage}
+            {currentPage + 1}
           </Button>
 
-          {currentPage < totalPages && (
+          {currentPage < totalPages - 1 && (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCurrentPage(currentPage + 1)}>
-              {currentPage + 1}
+              {currentPage + 2}
             </Button>
           )}
 
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}>
+            onClick={() => setCurrentPage(totalPages - 1)}
+            disabled={currentPage === totalPages - 1}>
             &gt;&gt;
           </Button>
         </div>

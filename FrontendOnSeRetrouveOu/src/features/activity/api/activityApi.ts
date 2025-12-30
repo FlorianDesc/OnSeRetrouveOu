@@ -2,10 +2,21 @@ import type { Activity } from "@/types/activity";
 
 const API_URL = "http://localhost:8080/api/activities";
 
-export const fetchActivities = async (): Promise<Activity[]> => {
+export type PaginatedResponse = {
+  content: Activity[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+};
+
+export const fetchActivities = async (
+  page: number = 0,
+  size: number = 10
+): Promise<PaginatedResponse> => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(API_URL, {
+  const response = await fetch(`${API_URL}?page=${page}&size=${size}`, {
     method: "GET",
     headers: {
       ...(token && { Authorization: `Bearer ${token}` }),
