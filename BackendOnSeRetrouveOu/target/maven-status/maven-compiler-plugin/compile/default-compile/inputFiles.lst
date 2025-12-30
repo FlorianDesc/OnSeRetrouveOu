@@ -4,6 +4,7 @@
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/ActivityController.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/AuthController.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/controller/HelloController.java
+/Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/dto/RegisterRequest.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/filter/JwtFilter.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/model/Activity.java
 /Users/floriandeschambres/Documents/COURS/M1/PROJET/OnSeRetrouveOu/BackendOnSeRetrouveOu/src/main/java/com/backend/OnSeRetrouveOu/model/RegistrationActivity.java
