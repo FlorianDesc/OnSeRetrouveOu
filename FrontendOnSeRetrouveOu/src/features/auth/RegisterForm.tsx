@@ -69,6 +69,21 @@ export default function RegisterForm() {
               )}
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                {...register("confirmPassword")}
+                placeholder="Confirmez votre mot de passe"
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
             {signUp.isError && (
               <p className="text-sm text-red-500">
                 Une erreur est survenue. Veuillez réessayer.
