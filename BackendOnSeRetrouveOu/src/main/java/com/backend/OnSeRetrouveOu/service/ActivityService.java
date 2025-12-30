@@ -1,5 +1,7 @@
 package com.backend.OnSeRetrouveOu.service;
 
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,29 @@ public class ActivityService {
         activity.setMaxParticipants(request.getMaxParticipants());
         activity.setCreator(creator);
         
+        return activityRepository.save(activity);
+    }
+
+    public Set<User> getActivityParticipants(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+            .orElseThrow(() -> new RuntimeException("Activity not found"));
+        return activity.getParticipants();
+    }
+
+    public Activity registerUserToActivity(Long activityId, User user) {
+        Activity activity = activityRepository.findById(activityId)
+            .orElseThrow(() -> new RuntimeException("Activity not found"));
+        
+        if (activity.getMaxParticipants() != null && 
+            activity.getParticipants().size() >= activity.getMaxParticipants()) {
+            throw new RuntimeException("Activity is full");
+        }
+        
+        if (activity.getParticipants().contains(user)) {
+            throw new RuntimeException("User already registered");
+        }
+        
+        activity.getParticipants().add(user);
         return activityRepository.save(activity);
     }
 }
