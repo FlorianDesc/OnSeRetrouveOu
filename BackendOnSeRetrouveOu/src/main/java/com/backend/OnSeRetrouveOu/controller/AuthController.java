@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.backend.OnSeRetrouveOu.config.JwtUtils;
+import com.backend.OnSeRetrouveOu.dto.RegisterRequest;
 import com.backend.OnSeRetrouveOu.model.User;
 import com.backend.OnSeRetrouveOu.repository.UserRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,13 +32,25 @@ public class AuthController {
   private final PasswordEncoder passwordEncoder;
   private final JwtUtils jwtUtils;
   private final AuthenticationManager authenticationManager;
-
+  
   @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody User user) {
-    if (userRepository.findByUsername(user.getUsername()) != null) {
+  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+    if (!request.isPasswordMatching()) {
+      return ResponseEntity.badRequest().body("Passwords do not match");
+    }
+    
+    if (userRepository.findByUsername(request.getUsername()) != null) {
       return ResponseEntity.badRequest().body("Username already exists");
     }
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    
+    User user = new User();
+    user.setUsername(request.getUsername());
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setFirstname(request.getFirstname());
+    user.setLastname(request.getLastname());
+    user.setEmail(request.getEmail());
+    user.setRole("ROLE_USER");
+    
     return ResponseEntity.ok(userRepository.save(user));
   }
 
