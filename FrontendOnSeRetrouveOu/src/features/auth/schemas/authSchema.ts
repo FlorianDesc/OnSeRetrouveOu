@@ -12,7 +12,14 @@ export const registerSchema = z
       .min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères"),
     password: z
       .string()
-      .min(4, "Le mot de passe doit contenir au moins 4 caractères"),
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
+      .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
+      .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
+      .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
+      .regex(
+        /[@$!%*?&]/,
+        "Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)"
+      ),
     confirmPassword: z.string().min(1, "Veuillez confirmer votre mot de passe"),
   })
   .refine((data) => data.password === data.confirmPassword, {
