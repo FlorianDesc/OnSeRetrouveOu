@@ -3,6 +3,8 @@ package com.backend.OnSeRetrouveOu.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,6 +31,7 @@ public class Activity {
     private String location;
 
     @Column(name = "date_activity")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateActivity;
 
     @Column(name = "created_at")

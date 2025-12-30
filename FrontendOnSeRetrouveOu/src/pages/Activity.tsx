@@ -1,6 +1,7 @@
 import SearchBar from "@/components/SearchBar";
 import { Spinner } from "@/components/ui/spinner";
 import ActivityCardList from "@/features/activity/ActivityCardList";
+import CreateActivityForm from "@/features/activity/CreateActivityForm";
 import { Suspense, useState } from "react";
 
 export default function Activity() {
@@ -14,12 +15,15 @@ export default function Activity() {
             <Spinner className="size-7 text-gray-700" />
           </div>
         }>
-        <div className="mb-6">
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Rechercher une activité"
-          />
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Rechercher une activité"
+            />
+          </div>
+          <CreateActivityForm />
         </div>
         <ActivityCardList />
       </Suspense>
