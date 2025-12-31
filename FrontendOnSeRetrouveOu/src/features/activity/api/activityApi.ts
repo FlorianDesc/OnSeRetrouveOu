@@ -43,8 +43,6 @@ export const createActivity = async (
 ): Promise<Activity> => {
   const token = localStorage.getItem("token");
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
   const response = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -91,6 +89,44 @@ export const fetchActivityParticipants = async (
 
   if (!response.ok) {
     throw new Error("Erreur lors de la récupération des participants");
+  }
+
+  return response.json();
+};
+
+export const registerToActivity = async (
+  activityId: number
+): Promise<Activity> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}/register`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    const normalized = (errorText || "").toLowerCase();
+    let message = errorText || "Erreur lors de l'inscription à l'activité";
+
+    if (normalized.includes("activity is full")) {
+      message = "Cette activité est déjà complète";
+    } else if (normalized.includes("user already registered")) {
+      message = "Vous êtes déjà inscrit à cette activité";
+    }
+    throw new Error(message);
   }
 
   return response.json();

@@ -1,6 +1,6 @@
 package com.backend.OnSeRetrouveOu.controller;
 
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -59,8 +59,8 @@ public class ActivityController {
     }
 
     @GetMapping("/{id}/participants")
-    public ResponseEntity<Set<User>> getActivityParticipants(@PathVariable Long id) {
-        Set<User> participants = activityService.getActivityParticipants(id);
+    public ResponseEntity<List<User>> getActivityParticipants(@PathVariable Long id) {
+        List<User> participants = activityService.getActivityParticipants(id);
         return ResponseEntity.ok(participants);
     }
 

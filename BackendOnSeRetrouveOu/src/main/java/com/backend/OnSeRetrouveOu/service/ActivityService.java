@@ -1,6 +1,7 @@
 package com.backend.OnSeRetrouveOu.service;
 
-import java.util.Set;
+import java.util.Comparator;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,10 +39,14 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
-    public Set<User> getActivityParticipants(Long activityId) {
+    public List<User> getActivityParticipants(Long activityId) {
         Activity activity = activityRepository.findById(activityId)
             .orElseThrow(() -> new RuntimeException("Activity not found"));
-        return activity.getParticipants();
+
+        return activity.getParticipants()
+            .stream()
+            .sorted(Comparator.comparing(User::getCreatedAt).reversed())
+            .toList();
     }
 
     public Activity registerUserToActivity(Long activityId, User user) {
