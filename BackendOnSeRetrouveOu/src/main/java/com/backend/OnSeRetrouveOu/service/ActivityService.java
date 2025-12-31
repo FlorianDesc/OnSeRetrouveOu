@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.OnSeRetrouveOu.dto.CreateActivityRequest;
 import com.backend.OnSeRetrouveOu.model.Activity;
@@ -63,6 +64,28 @@ public class ActivityService {
         }
         
         activity.getParticipants().add(user);
+        return activityRepository.save(activity);
+    }
+
+    @Transactional
+    public void deleteActivity(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+            .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        activity.getParticipants().clear();
+        activityRepository.delete(activity);
+    }
+
+    public Activity updateActivity(Long activityId, CreateActivityRequest request) {
+        Activity activity = activityRepository.findById(activityId)
+            .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        activity.setTitle(request.getTitle());
+        activity.setDescription(request.getDescription());
+        activity.setLocation(request.getLocation());
+        activity.setDateActivity(request.getDateActivity());
+        activity.setMaxParticipants(request.getMaxParticipants());
+
         return activityRepository.save(activity);
     }
 }
