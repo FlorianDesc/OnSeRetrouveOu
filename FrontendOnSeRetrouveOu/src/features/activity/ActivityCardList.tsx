@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { fetchCurrentUser } from "../user/api/userApi";
 import ActivityCard from "./ActivityCard";
 import { fetchActivities } from "./api/activityApi";
+
+import type { User } from "@/types/user";
 
 export default function ActivityCardList() {
   const [currentPage, setCurrentPage] = useState(0);
@@ -10,6 +13,11 @@ export default function ActivityCardList() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [currentPage]);
+
+  const { data: currentUser } = useSuspenseQuery<User>({
+    queryKey: ["current-user"],
+    queryFn: fetchCurrentUser,
+  });
 
   const { data } = useSuspenseQuery({
     queryKey: ["activities", currentPage],
@@ -23,7 +31,11 @@ export default function ActivityCardList() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {currentActivities.map((activity) => (
-          <ActivityCard key={activity.id} activity={activity} />
+          <ActivityCard
+            key={activity.id}
+            activity={activity}
+            currentUser={currentUser}
+          />
         ))}
       </div>
 

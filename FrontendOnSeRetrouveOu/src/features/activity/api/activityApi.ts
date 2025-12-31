@@ -1,4 +1,5 @@
 import type { Activity } from "@/types/activity";
+import type { User } from "@/types/user";
 import type { CreateActivityFormData } from "../schemas/activitySchema";
 
 const API_URL = "http://localhost:8080/api/activities";
@@ -42,8 +43,6 @@ export const createActivity = async (
 ): Promise<Activity> => {
   const token = localStorage.getItem("token");
 
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
   const response = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -61,6 +60,73 @@ export const createActivity = async (
 
   if (!response.ok) {
     throw new Error("Erreur lors de la création de l'activité");
+  }
+
+  return response.json();
+};
+
+export const fetchActivityParticipants = async (
+  activityId: number
+): Promise<User[]> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}/participants`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération des participants");
+  }
+
+  return response.json();
+};
+
+export const registerToActivity = async (
+  activityId: number
+): Promise<Activity> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}/register`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    const normalized = (errorText || "").toLowerCase();
+    let message = errorText || "Erreur lors de l'inscription à l'activité";
+
+    if (normalized.includes("activity is full")) {
+      message = "Cette activité est déjà complète";
+    } else if (normalized.includes("user already registered")) {
+      message = "Vous êtes déjà inscrit à cette activité";
+    }
+    throw new Error(message);
   }
 
   return response.json();
