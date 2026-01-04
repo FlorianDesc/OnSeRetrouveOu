@@ -131,3 +131,60 @@ export const registerToActivity = async (
 
   return response.json();
 };
+
+export const updateActivity = async (
+  activityId: number,
+  data: CreateActivityFormData
+): Promise<Activity> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la mise à jour de l'activité");
+  }
+
+  return response.json();
+};
+
+export const deleteActivity = async (activityId: number): Promise<void> => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    throw new Error("Utilisateur non authentifié");
+  }
+
+  const response = await fetch(`${API_URL}/${activityId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Session expirée");
+  }
+
+  if (!response.ok) {
+    throw new Error("Erreur lors de la suppression de l'activité");
+  }
+};
