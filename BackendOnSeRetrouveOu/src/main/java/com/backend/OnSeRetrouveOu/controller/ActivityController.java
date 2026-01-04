@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,6 +79,39 @@ public class ActivityController {
         }
         
         Activity activity = activityService.registerUserToActivity(id, user);
+        return ResponseEntity.ok(activity);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteActivity(
+        @PathVariable Long id,
+        Authentication authentication
+    ) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        activityService.deleteActivity(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateActivity(
+        @PathVariable Long id,
+        @Valid @RequestBody CreateActivityRequest request,
+        Authentication authentication
+    ) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        
+        Activity activity = activityService.updateActivity(id, request, user);
         return ResponseEntity.ok(activity);
     }
 }

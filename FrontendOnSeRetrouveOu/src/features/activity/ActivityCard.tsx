@@ -1,28 +1,55 @@
 import defaultImg from "@/assets/default-picture.jpg";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import type { Activity } from "@/types/activity";
 import type { User } from "@/types/user";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Calendar, MapPin, User as UserIcon, Users } from "lucide-react";
+import {
+  Calendar,
+  Edit2,
+  Eye,
+  MapPin,
+  MoreHorizontal,
+  Trash2,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  deleteActivity,
   fetchActivityParticipants,
   registerToActivity,
 } from "./api/activityApi";
 import { activityImages } from "./constants/activityImages";
+import ActivityForm from "./CreateActivityForm";
 
 type ActivityCardProps = {
   activity: Activity;
@@ -34,6 +61,8 @@ export default function ActivityCard({
   currentUser,
 }: ActivityCardProps) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const formattedDate = new Date(activity.dateActivity).toLocaleDateString(
@@ -69,6 +98,18 @@ export default function ActivityCard({
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteActivity(activity.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      setIsDeleteDialogOpen(false);
+      toast.success("Activité supprimée avec succès");
+    },
+    onError: (error: Error) => {
+      toast.error(error?.message || "Erreur lors de la suppression");
+    },
+  });
+
   const participantList = participants || [];
 
   const getInitial = (user: User) => {
@@ -89,10 +130,42 @@ export default function ActivityCard({
           </div>
         )}
         <div className="flex flex-col w-[70%] py-4 h-full">
-          <CardHeader className="pb-0">
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-semibold">
               {activity.title}
             </CardTitle>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal className="size-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onSelect={() => setIsSheetOpen(true)}>
+                  <Eye className="size-4" />
+                  Voir les participants
+                </DropdownMenuItem>
+                {isCreator && (
+                  <>
+                    <DropdownMenuItem
+                      className="flex items-center gap-2"
+                      onSelect={() => setIsEditSheetOpen(true)}>
+                      <Edit2 className="size-4" />
+                      Modifier
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="group flex items-center gap-2 text-red-600 data-highlighted:bg-red-50 data-highlighted:text-red-700 focus:bg-red-50 focus:text-red-700"
+                      onSelect={() => setIsDeleteDialogOpen(true)}>
+                      <Trash2 className="size-4 text-red-600 group-data-highlighted:text-red-700" />
+                      Supprimer
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardHeader>
           <CardContent className="space-y-0 pt-0 flex flex-col h-full">
             <div className="flex-1 flex flex-col justify-start">
@@ -123,29 +196,22 @@ export default function ActivityCard({
             </div>
 
             <div className="mt-6 w-full flex flex-row flex-wrap gap-3 items-end">
-              {!isCreator && (
-                <Button
-                  className="flex-[0.65] min-w-[100px]"
-                  variant="default"
-                  onClick={() => registerMutation.mutate()}
-                  disabled={registerMutation.isPending}>
-                  {registerMutation.isPending ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <Spinner className="text-white" />
-                      <span className="sr-only">Inscription...</span>
-                    </div>
-                  ) : (
-                    "S'inscrire"
-                  )}
-                </Button>
-              )}
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => registerMutation.mutate()}
+                disabled={isCreator || registerMutation.isPending}>
+                {registerMutation.isPending ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Spinner className="text-current" />
+                    <span className="sr-only">Inscription...</span>
+                  </div>
+                ) : (
+                  "S'inscrire"
+                )}
+              </Button>
 
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button className="flex-1 min-w-[140px]" variant="outline">
-                    Voir les participants
-                  </Button>
-                </SheetTrigger>
                 <SheetContent side="right">
                   <SheetHeader>
                     <SheetTitle>Participants</SheetTitle>
@@ -191,10 +257,48 @@ export default function ActivityCard({
                   </div>
                 </SheetContent>
               </Sheet>
+
+              <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+                <SheetContent side="right">
+                  <SheetHeader>
+                    <SheetTitle>Modifier l'activité</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <ActivityForm
+                      activity={activity}
+                      onSuccess={() => setIsEditSheetOpen(false)}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </CardContent>
         </div>
       </div>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette activité ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est définitive. Confirmez pour supprimer l'activité "
+              {activity.title}".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}>
+              {deleteMutation.isPending ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
