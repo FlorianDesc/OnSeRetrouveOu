@@ -83,17 +83,35 @@ public class ActivityController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteActivity(@PathVariable Long id) {
-        activityService.deleteActivity(id);
+    public ResponseEntity<Void> deleteActivity(
+        @PathVariable Long id,
+        Authentication authentication
+    ) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        activityService.deleteActivity(id, user);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateActivity(
         @PathVariable Long id,
-        @Valid @RequestBody CreateActivityRequest request
+        @Valid @RequestBody CreateActivityRequest request,
+        Authentication authentication
     ) {
-        Activity activity = activityService.updateActivity(id, request);
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+        
+        if (user == null) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        
+        Activity activity = activityService.updateActivity(id, request, user);
         return ResponseEntity.ok(activity);
     }
 }

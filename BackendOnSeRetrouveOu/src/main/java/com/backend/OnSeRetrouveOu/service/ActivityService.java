@@ -68,17 +68,25 @@ public class ActivityService {
     }
 
     @Transactional
-    public void deleteActivity(Long activityId) {
+    public void deleteActivity(Long activityId, User currentUser) {
         Activity activity = activityRepository.findById(activityId)
             .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        if (!activity.getCreator().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not authorized to delete this activity");
+        }
 
         activity.getParticipants().clear();
         activityRepository.delete(activity);
     }
 
-    public Activity updateActivity(Long activityId, CreateActivityRequest request) {
+    public Activity updateActivity(Long activityId, CreateActivityRequest request, User currentUser) {
         Activity activity = activityRepository.findById(activityId)
             .orElseThrow(() -> new RuntimeException("Activity not found"));
+
+        if (!activity.getCreator().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not authorized to update this activity");
+        }
 
         activity.setTitle(request.getTitle());
         activity.setDescription(request.getDescription());
