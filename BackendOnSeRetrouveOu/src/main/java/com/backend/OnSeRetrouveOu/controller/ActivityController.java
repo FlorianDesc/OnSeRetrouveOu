@@ -2,6 +2,7 @@ package com.backend.OnSeRetrouveOu.controller;
 
 import java.util.List;
 
+import com.backend.OnSeRetrouveOu.model.ActivitySort;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +40,9 @@ public class ActivityController {
     @GetMapping
     public Page<Activity> getAllActivies(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-    ) {
-        return activityService.getAllActivities(page, size);
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "DATE_RECENT") ActivitySort sort) {
+        return activityService.getAllActivities(page, size, sort);
     }
 
     @PostMapping

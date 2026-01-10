@@ -3,6 +3,7 @@ package com.backend.OnSeRetrouveOu.service;
 import java.util.Comparator;
 import java.util.List;
 
+import com.backend.OnSeRetrouveOu.model.ActivitySort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,17 @@ import lombok.RequiredArgsConstructor;
 public class ActivityService {
     private final ActivityRepository activityRepository;
 
-    public Page<Activity> getAllActivities(int page, int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    public Page<Activity> getAllActivities(int page, int size, ActivitySort order){
+
+        Sort sort = switch(order){
+            case DATE_RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case DATE_OLD -> Sort.by(Sort.Direction.ASC, "createdAt");
+            case ALPHA_AZ -> Sort.by(Sort.Direction.ASC, "title");
+            case ALPHA_ZA -> Sort.by(Sort.Direction.DESC, "title");
+        };
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
         return activityRepository.findAll(pageable);
     }
 
