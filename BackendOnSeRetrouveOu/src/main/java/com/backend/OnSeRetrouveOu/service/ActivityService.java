@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ActivityService {
     private final ActivityRepository activityRepository;
 
-    public Page<Activity> getAllActivities(int page, int size, ActivitySort order){
+    public Page<Activity> getAllActivities(int page, int size, ActivitySort order, String search){
 
         Sort sort = switch(order){
             case DATE_RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
@@ -35,7 +35,11 @@ public class ActivityService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return activityRepository.findAll(pageable);
+        if (search == null || search.isBlank()) {
+            return activityRepository.findAll(pageable);
+        }
+
+        return activityRepository.findByTitleContainingIgnoreCase(search, pageable);
     }
 
     public Activity createActivity(CreateActivityRequest request, User creator) {

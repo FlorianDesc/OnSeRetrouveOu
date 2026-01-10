@@ -41,8 +41,9 @@ public class ActivityController {
     public Page<Activity> getAllActivies(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "DATE_RECENT") ActivitySort sort) {
-        return activityService.getAllActivities(page, size, sort);
+        @RequestParam(defaultValue = "DATE_RECENT") ActivitySort sort,
+        @RequestParam(required = false) String search) {
+        return activityService.getAllActivities(page, size, sort, search);
     }
 
     @PostMapping
