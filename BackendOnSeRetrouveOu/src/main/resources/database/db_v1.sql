@@ -14,7 +14,8 @@ CREATE TABLE activities (
 	date_activity DATE,
 	created_at TIMESTAMP DEFAULT NOW(),
 	creator_id INTEGER REFERENCES users(id),
-    max_participants INTEGER
+    max_participants INTEGER,
+    imagePath VARCHAR(255)
 );
 
 CREATE TABLE registrations_activities (

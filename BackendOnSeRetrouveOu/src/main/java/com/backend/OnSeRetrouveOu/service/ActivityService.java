@@ -17,12 +17,14 @@ import com.backend.OnSeRetrouveOu.model.User;
 import com.backend.OnSeRetrouveOu.repository.ActivityRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RequiredArgsConstructor
 @Service
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final ImageService imageService;
 
     public Page<Activity> getAllActivities(int page, int size, ActivitySort order, String search){
 
@@ -42,7 +44,7 @@ public class ActivityService {
         return activityRepository.findByTitleContainingIgnoreCase(search, pageable);
     }
 
-    public Activity createActivity(CreateActivityRequest request, User creator) {
+    public Activity createActivity(CreateActivityRequest request, User creator, MultipartFile image) {
         Activity activity = new Activity();
         activity.setTitle(request.getTitle());
         activity.setDescription(request.getDescription());
@@ -50,6 +52,9 @@ public class ActivityService {
         activity.setDateActivity(request.getDateActivity());
         activity.setMaxParticipants(request.getMaxParticipants());
         activity.setCreator(creator);
+
+        String imagePath = imageService.saveActivityImage(image);
+        activity.setImagePath(imagePath);
         
         return activityRepository.save(activity);
     }
