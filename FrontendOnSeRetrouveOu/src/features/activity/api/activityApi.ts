@@ -14,11 +14,19 @@ export type PaginatedResponse = {
 
 export const fetchActivities = async (
   page: number = 0,
-  size: number = 10
+  size: number = 10,
+  sort?: string,
+  search?: string
 ): Promise<PaginatedResponse> => {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_URL}?page=${page}&size=${size}`, {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("size", String(size));
+  if (sort) params.set("sort", sort);
+  if (search) params.set("search", search);
+
+  const response = await fetch(`${API_URL}?${params.toString()}`, {
     method: "GET",
     headers: {
       ...(token && { Authorization: `Bearer ${token}` }),

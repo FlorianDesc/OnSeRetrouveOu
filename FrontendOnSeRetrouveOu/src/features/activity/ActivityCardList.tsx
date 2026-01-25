@@ -7,7 +7,12 @@ import { fetchActivities } from "./api/activityApi";
 
 import type { User } from "@/types/user";
 
-export default function ActivityCardList() {
+type Props = {
+  search?: string;
+  sort?: string;
+};
+
+export default function ActivityCardList({ search, sort }: Props) {
   const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
@@ -20,8 +25,8 @@ export default function ActivityCardList() {
   });
 
   const { data } = useSuspenseQuery({
-    queryKey: ["activities", currentPage],
-    queryFn: () => fetchActivities(currentPage, 10),
+    queryKey: ["activities", currentPage, search ?? null, sort ?? null],
+    queryFn: () => fetchActivities(currentPage, 10, sort, search),
   });
 
   const totalPages = data.totalPages;

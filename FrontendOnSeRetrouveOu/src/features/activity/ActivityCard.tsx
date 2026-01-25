@@ -239,14 +239,9 @@ export default function ActivityCard({
                                 {getInitial(participant)}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex flex-col text-sm text-gray-800">
-                              <span>
-                                {capitalizeFirstLetter(participant.firstname)}{" "}
-                                {capitalizeFirstLetter(participant.lastname)}
-                              </span>
-                              <span>
-                                {capitalizeFirstLetter(participant.username)}
-                              </span>
+                            <div className="text-sm text-gray-800">
+                              {capitalizeFirstLetter(participant.firstname)}{" "}
+                              {capitalizeFirstLetter(participant.lastname)}
                             </div>
                           </div>
                           {index < participantList.length - 1 && (
