@@ -9,4 +9,5 @@ export type Activity = {
   createdAt: string;
   creator: User;
   maxParticipants: number;
+  imageName?: string;
 };

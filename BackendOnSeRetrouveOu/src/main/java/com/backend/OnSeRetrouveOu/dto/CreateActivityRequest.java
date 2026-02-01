@@ -22,4 +22,6 @@ public class CreateActivityRequest {
     private LocalDate dateActivity;
     
     private Integer maxParticipants;
+
+    private String imageName;
 }

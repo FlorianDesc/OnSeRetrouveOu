@@ -48,6 +48,9 @@ public class Activity {
     @Column(name = "max_participants")
     private Integer maxParticipants;
 
+    @Column(name = "image_name")
+    private String imageName;
+
     @ManyToMany
     @JoinTable(
         name = "registrations_activities",

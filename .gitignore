@@ -7,7 +7,7 @@ dist/
 # Spring Boot
 target/
 *.log
-application.properties
+uploads/
 
 # IDE
 .vscode/
