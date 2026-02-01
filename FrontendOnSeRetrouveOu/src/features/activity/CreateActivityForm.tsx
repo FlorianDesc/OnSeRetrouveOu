@@ -16,7 +16,7 @@ import { Spinner } from "@/components/ui/spinner";
 import type { Activity } from "@/types/activity";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, ImageIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Controller,
@@ -27,6 +27,7 @@ import {
 } from "react-hook-form";
 import { toast } from "sonner";
 import { createActivity, updateActivity } from "./api/activityApi";
+import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
 import {
   createActivitySchema,
   type CreateActivityFormData,
@@ -41,9 +42,21 @@ type FormFieldsProps = {
   register: UseFormRegister<CreateActivityFormData>;
   control: Control<CreateActivityFormData>;
   errors: FieldErrors<CreateActivityFormData>;
+  imagePreview: string | null;
+  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onImageRemove: () => void;
+  isUploading: boolean;
 };
 
-const FormFields = ({ register, control, errors }: FormFieldsProps) => (
+const FormFields = ({
+  register,
+  control,
+  errors,
+  imagePreview,
+  onImageChange,
+  onImageRemove,
+  isUploading,
+}: FormFieldsProps) => (
   <>
     <div className="flex flex-col gap-2">
       <Label htmlFor="title">
@@ -108,6 +121,48 @@ const FormFields = ({ register, control, errors }: FormFieldsProps) => (
         <p className="text-sm text-red-500">{errors.maxParticipants.message}</p>
       )}
     </div>
+
+    <div className="flex flex-col gap-2">
+      <Label>Image (optionnel)</Label>
+      {imagePreview ? (
+        <div className="relative w-full h-40 rounded-md overflow-hidden border">
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={onImageRemove}
+            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70">
+            <XIcon className="h-4 w-4" />
+          </button>
+        </div>
+      ) : (
+        <label
+          htmlFor="image-upload"
+          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-md cursor-pointer hover:border-gray-400 transition-colors">
+          {isUploading ? (
+            <Spinner className="h-6 w-6" />
+          ) : (
+            <>
+              <ImageIcon className="h-8 w-8 text-gray-400" />
+              <span className="text-sm text-gray-500 mt-2">
+                Cliquez pour ajouter une image
+              </span>
+            </>
+          )}
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onImageChange}
+            disabled={isUploading}
+          />
+        </label>
+      )}
+    </div>
   </>
 );
 
@@ -116,6 +171,8 @@ export default function ActivityForm({
   onSuccess,
 }: ActivityFormProps) {
   const [open, setOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
   const isEditing = !!activity;
 
@@ -134,6 +191,7 @@ export default function ActivityForm({
       location: "",
       dateActivity: "",
       maxParticipants: undefined,
+      imageName: undefined,
     },
   });
 
@@ -144,14 +202,51 @@ export default function ActivityForm({
       setValue("location", activity.location);
       setValue("dateActivity", activity.dateActivity);
       setValue("maxParticipants", activity.maxParticipants || undefined);
+      setValue("imageName", activity.imageName || undefined);
+      if (activity.imageName) {
+        setImagePreview(`${UPLOADS_BASE_URL}/${activity.imageName}`);
+      }
     }
   }, [activity, isEditing, setValue]);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload
+    setIsUploading(true);
+    try {
+      const result = await uploadImage(file);
+      setValue("imageName", result.fileName);
+      toast.success("Image uploadée");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Erreur lors de l'upload",
+      );
+      setImagePreview(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setImagePreview(null);
+    setValue("imageName", undefined);
+  };
 
   const createMutation = useMutation({
     mutationFn: createActivity,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] });
       reset();
+      setImagePreview(null);
       setOpen(false);
       toast.success("Activité créée avec succès");
     },
@@ -188,7 +283,15 @@ export default function ActivityForm({
 
   const formContent = (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <FormFields register={register} control={control} errors={errors} />
+      <FormFields
+        register={register}
+        control={control}
+        errors={errors}
+        imagePreview={imagePreview}
+        onImageChange={handleImageChange}
+        onImageRemove={handleImageRemove}
+        isUploading={isUploading}
+      />
 
       {isEditing ? (
         <div className="flex gap-2 mt-4">

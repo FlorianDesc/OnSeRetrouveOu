@@ -3,7 +3,6 @@ package com.backend.OnSeRetrouveOu.service;
 import java.util.Comparator;
 import java.util.List;
 
-import com.backend.OnSeRetrouveOu.model.ActivitySort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.OnSeRetrouveOu.dto.CreateActivityRequest;
 import com.backend.OnSeRetrouveOu.model.Activity;
+import com.backend.OnSeRetrouveOu.model.ActivitySort;
 import com.backend.OnSeRetrouveOu.model.User;
 import com.backend.OnSeRetrouveOu.repository.ActivityRepository;
 
@@ -49,6 +49,7 @@ public class ActivityService {
         activity.setLocation(request.getLocation());
         activity.setDateActivity(request.getDateActivity());
         activity.setMaxParticipants(request.getMaxParticipants());
+        activity.setImageName(request.getImageName());
         activity.setCreator(creator);
         
         return activityRepository.save(activity);
@@ -107,6 +108,7 @@ public class ActivityService {
         activity.setLocation(request.getLocation());
         activity.setDateActivity(request.getDateActivity());
         activity.setMaxParticipants(request.getMaxParticipants());
+        activity.setImageName(request.getImageName());
 
         return activityRepository.save(activity);
     }

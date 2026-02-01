@@ -16,7 +16,7 @@ export const fetchActivities = async (
   page: number = 0,
   size: number = 10,
   sort?: string,
-  search?: string
+  search?: string,
 ): Promise<PaginatedResponse> => {
   const token = localStorage.getItem("token");
 
@@ -47,7 +47,7 @@ export const fetchActivities = async (
 };
 
 export const createActivity = async (
-  data: CreateActivityFormData
+  data: CreateActivityFormData,
 ): Promise<Activity> => {
   const token = localStorage.getItem("token");
 
@@ -74,7 +74,7 @@ export const createActivity = async (
 };
 
 export const fetchActivityParticipants = async (
-  activityId: number
+  activityId: number,
 ): Promise<User[]> => {
   const token = localStorage.getItem("token");
 
@@ -103,7 +103,7 @@ export const fetchActivityParticipants = async (
 };
 
 export const registerToActivity = async (
-  activityId: number
+  activityId: number,
 ): Promise<Activity> => {
   const token = localStorage.getItem("token");
 
@@ -142,7 +142,7 @@ export const registerToActivity = async (
 
 export const updateActivity = async (
   activityId: number,
-  data: CreateActivityFormData
+  data: CreateActivityFormData,
 ): Promise<Activity> => {
   const token = localStorage.getItem("token");
 

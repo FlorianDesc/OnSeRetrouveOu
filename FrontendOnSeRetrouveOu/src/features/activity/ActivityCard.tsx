@@ -27,6 +27,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import { UPLOADS_BASE_URL } from "@/lib/uploadApi";
 import { capitalizeFirstLetter } from "@/lib/utils";
 import type { Activity } from "@/types/activity";
 import type { User } from "@/types/user";
@@ -71,10 +72,12 @@ export default function ActivityCard({
       day: "numeric",
       month: "long",
       year: "numeric",
-    }
+    },
   );
 
-  const activityImage = activityImages[activity.id] || defaultImg;
+  const activityImage = activity.imageName
+    ? `${UPLOADS_BASE_URL}/${activity.imageName}`
+    : activityImages[activity.id] || defaultImg;
   const isCreator = currentUser && activity.creator?.id === currentUser.id;
 
   const { data: participants, isLoading: participantsLoading } = useQuery({
