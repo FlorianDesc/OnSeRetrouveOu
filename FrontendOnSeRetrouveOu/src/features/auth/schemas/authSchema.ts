@@ -10,6 +10,16 @@ export const registerSchema = z
     username: z
       .string()
       .min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères"),
+    firstname: z
+      .string()
+      .min(1, "Le prénom est obligatoire"),
+    lastname: z
+      .string()
+      .min(1, "Le nom est obligatoire"),
+    email: z
+      .string()
+      .min(1, "L'email est obligatoire")
+      .email("L'email n'est pas valide"),
     password: z
       .string()
       .min(8, "Le mot de passe doit contenir au moins 8 caractères")

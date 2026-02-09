@@ -26,13 +26,12 @@ public class FileUploadController {
     @PostMapping
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
-            // Validate file type
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed"));
             }
 
-            // Validate file size (max 5MB)
+            // max 5MB
             if (file.getSize() > 5 * 1024 * 1024) {
                 return ResponseEntity.badRequest().body(Map.of("error", "File size must be less than 5MB"));
             }
