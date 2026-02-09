@@ -39,6 +39,53 @@ export default function RegisterForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstname">Prénom</Label>
+                <Input
+                  id="firstname"
+                  type="text"
+                  {...register("firstname")}
+                  placeholder="Votre prénom"
+                />
+                {errors.firstname && (
+                  <p className="text-sm text-red-500">
+                    {errors.firstname.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastname">Nom</Label>
+                <Input
+                  id="lastname"
+                  type="text"
+                  {...register("lastname")}
+                  placeholder="Votre nom"
+                />
+                {errors.lastname && (
+                  <p className="text-sm text-red-500">
+                    {errors.lastname.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                {...register("email")}
+                placeholder="votre@email.com"
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="username">Nom d'utilisateur</Label>
               <Input
