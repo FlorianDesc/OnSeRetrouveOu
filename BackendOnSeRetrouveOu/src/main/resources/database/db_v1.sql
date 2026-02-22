@@ -25,6 +25,14 @@ CREATE TABLE registrations_activities (
 	UNIQUE (activity_id, user_id)
 );
 
+CREATE TABLE collaborative_list_items (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(120) NOT NULL,
+  bring_text TEXT,
+  status VARCHAR(20) NOT NULL,
+  activity_id INTEGER NOT NULL REFERENCES activities(id)
+);
+
 /* A potentiellement rajouter : 
 - Dernière date de modification;
 - Statut de l'activité (active, annulée, terminée); (si jamais on a un historique d'activités, c'est bien);
