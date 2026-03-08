@@ -1,4 +1,5 @@
 import type { AuthCredentials, AuthResponse, RegisterCredentials } from "@/types/auth";
+import { translateErrorMessage } from "@/lib/errorTranslator";
 
 const API_URL = "http://localhost:8080/api/auth";
 
@@ -14,7 +15,23 @@ export const login = async (
   });
 
   if (!response.ok) {
-    throw new Error("Erreur de connexion");
+    let errorMessage = "Erreur de connexion";
+    
+    try {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } else {
+        // Si ce n'est pas du JSON, récupère le texte brut
+        errorMessage = await response.text();
+      }
+    } catch {
+      // Si le parsing échoue, utilise le message par défaut
+      errorMessage = "Erreur de connexion";
+    }
+    
+    throw new Error(translateErrorMessage(errorMessage));
   }
 
   return response.json();
@@ -38,7 +55,23 @@ export const register = async (credentials: RegisterCredentials): Promise<void> 
   });
 
   if (!response.ok) {
-    throw new Error("Erreur d'inscription");
+    let errorMessage = "Erreur d'inscription";
+    
+    try {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } else {
+        // Si ce n'est pas du JSON, récupère le texte brut
+        errorMessage = await response.text();
+      }
+    } catch {
+      // Si le parsing échoue, utilise le message par défaut
+      errorMessage = "Erreur d'inscription";
+    }
+    
+    throw new Error(translateErrorMessage(errorMessage));
   }
 
   return response.json();
