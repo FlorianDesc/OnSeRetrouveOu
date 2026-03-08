@@ -36,6 +36,7 @@ import {
   Calendar,
   Edit2,
   Eye,
+  ListTodo,
   MapPin,
   MoreHorizontal,
   Trash2,
@@ -49,6 +50,7 @@ import {
   fetchActivityParticipants,
   registerToActivity,
 } from "./api/activityApi";
+import CollaborativeListSheet from "./CollaborativeListSheet";
 import { activityImages } from "./constants/activityImages";
 import ActivityForm from "./CreateActivityForm";
 
@@ -64,6 +66,7 @@ export default function ActivityCard({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCollaborativeListOpen, setIsCollaborativeListOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const formattedDate = new Date(activity.dateActivity).toLocaleDateString(
@@ -149,6 +152,12 @@ export default function ActivityCard({
                   onSelect={() => setIsSheetOpen(true)}>
                   <Eye className="size-4" />
                   Voir les participants
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex items-center gap-2"
+                  onSelect={() => setIsCollaborativeListOpen(true)}>
+                  <ListTodo className="size-4" />
+                  Liste collaborative
                 </DropdownMenuItem>
                 {isCreator && (
                   <>
@@ -269,6 +278,13 @@ export default function ActivityCard({
                   </div>
                 </SheetContent>
               </Sheet>
+
+              <CollaborativeListSheet
+                activity={activity}
+                isOpen={isCollaborativeListOpen}
+                onOpenChange={setIsCollaborativeListOpen}
+                currentUserId={currentUser?.id}
+              />
             </div>
           </CardContent>
         </div>

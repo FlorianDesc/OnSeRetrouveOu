@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { registerSchema, type RegisterFormData } from "./schemas/authSchema";
 
 export default function RegisterForm() {
@@ -23,10 +24,11 @@ export default function RegisterForm() {
   const onSubmit = (data: RegisterFormData) => {
     signUp.mutate(data, {
       onSuccess: () => {
+        toast.success("Inscription réussie ! Redirection...");
         navigate("/login");
       },
-      onError: (error) => {
-        console.error("Erreur d'inscription:", error);
+      onError: (error: Error) => {
+        toast.error(error?.message || "Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
       },
     });
   };
@@ -130,12 +132,6 @@ export default function RegisterForm() {
                 </p>
               )}
             </div>
-
-            {signUp.isError && (
-              <p className="text-sm text-red-500">
-                Une erreur est survenue. Veuillez réessayer.
-              </p>
-            )}
 
             <Button
               type="submit"
