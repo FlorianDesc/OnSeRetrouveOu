@@ -38,6 +38,7 @@ public class CollaborativeListController {
         return ResponseEntity.ok(items);
     }
 
+
     @PostMapping("/{id}/collaborative-list")
     public ResponseEntity<?> addCollaborativeListItem(@PathVariable Long id,
                                                       @Valid @RequestBody CollaborativeListItemRequest request,

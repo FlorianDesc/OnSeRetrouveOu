@@ -19,13 +19,14 @@ public class CollaborativeListItem {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private CollaborativeListItemStatus status = CollaborativeListItemStatus.A_APPORTER;
+    private CollaborativeListItemStatus status = CollaborativeListItemStatus.EN_ATTENTE;
 
     @ManyToOne
     @JoinColumn(name = "activity_id", nullable = false)
     private Activity activity;
 
+
     @ManyToOne
-    @JoinColumn(name = "creator_id", nullable = false)
-    private User creator;
+    @JoinColumn(name = "assigned_user_id")
+    private User assignedUser;
 }
