@@ -1,10 +1,15 @@
-import type { AuthCredentials, AuthResponse, RegisterCredentials } from "@/types/auth";
+import { API_BASE_URL } from "@/config";
 import { translateErrorMessage } from "@/lib/errorTranslator";
+import type {
+  AuthCredentials,
+  AuthResponse,
+  RegisterCredentials,
+} from "@/types/auth";
 
-const API_URL = "http://localhost:8080/api/auth";
+const API_URL = `${API_BASE_URL}/auth`;
 
 export const login = async (
-  credentials: AuthCredentials
+  credentials: AuthCredentials,
 ): Promise<AuthResponse> => {
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
@@ -16,7 +21,7 @@ export const login = async (
 
   if (!response.ok) {
     let errorMessage = "Erreur de connexion";
-    
+
     try {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
@@ -30,14 +35,16 @@ export const login = async (
       // Si le parsing échoue, utilise le message par défaut
       errorMessage = "Erreur de connexion";
     }
-    
+
     throw new Error(translateErrorMessage(errorMessage));
   }
 
   return response.json();
 };
 
-export const register = async (credentials: RegisterCredentials): Promise<void> => {
+export const register = async (
+  credentials: RegisterCredentials,
+): Promise<void> => {
   const response = await fetch(`${API_URL}/register`, {
     method: "POST",
     headers: {
@@ -56,7 +63,7 @@ export const register = async (credentials: RegisterCredentials): Promise<void> 
 
   if (!response.ok) {
     let errorMessage = "Erreur d'inscription";
-    
+
     try {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
@@ -70,7 +77,7 @@ export const register = async (credentials: RegisterCredentials): Promise<void> 
       // Si le parsing échoue, utilise le message par défaut
       errorMessage = "Erreur d'inscription";
     }
-    
+
     throw new Error(translateErrorMessage(errorMessage));
   }
 

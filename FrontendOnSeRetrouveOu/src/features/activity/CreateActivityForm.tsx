@@ -1,3 +1,5 @@
+import { createActivity, updateActivity } from "@/api/activity/activity.api";
+import { activityKeys } from "@/api/activity/activity.queries";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
@@ -13,10 +15,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
 import type { Activity } from "@/types/activity";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, ImageIcon, XIcon } from "lucide-react";
+import { ImageIcon, PlusIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Controller,
@@ -26,8 +29,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { toast } from "sonner";
-import { createActivity, updateActivity } from "./api/activityApi";
-import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
+import { LocationCombobox } from "./components/LocationCombobox";
 import {
   createActivitySchema,
   type CreateActivityFormData,
@@ -46,6 +48,8 @@ type FormFieldsProps = {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageRemove: () => void;
   isUploading: boolean;
+  locationValue: string;
+  onLocationChange: (value: string) => void;
 };
 
 const FormFields = ({
@@ -54,6 +58,8 @@ const FormFields = ({
   errors,
   imagePreview,
   onImageChange,
+  locationValue,
+  onLocationChange,
   onImageRemove,
   isUploading,
 }: FormFieldsProps) => (
@@ -78,15 +84,11 @@ const FormFields = ({
       )}
     </div>
 
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="location">
-        Lieu<span className="text-red-500">*</span>
-      </Label>
-      <Input id="location" {...register("location")} />
-      {errors.location && (
-        <p className="text-sm text-red-500">{errors.location.message}</p>
-      )}
-    </div>
+    <LocationCombobox
+      value={locationValue}
+      onChange={onLocationChange}
+      error={errors.location?.message}
+    />
 
     <div className="flex flex-col gap-2">
       <Label htmlFor="dateActivity">
@@ -173,6 +175,7 @@ export default function ActivityForm({
   const [open, setOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [locationValue, setLocationValue] = useState("");
   const queryClient = useQueryClient();
   const isEditing = !!activity;
 
@@ -200,6 +203,7 @@ export default function ActivityForm({
       setValue("title", activity.title);
       setValue("description", activity.description);
       setValue("location", activity.location);
+      setLocationValue(activity.location);
       setValue("dateActivity", activity.dateActivity);
       setValue("maxParticipants", activity.maxParticipants || undefined);
       setValue("imageName", activity.imageName || undefined);
@@ -244,7 +248,7 @@ export default function ActivityForm({
   const createMutation = useMutation({
     mutationFn: createActivity,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       reset();
       setImagePreview(null);
       setOpen(false);
@@ -260,7 +264,7 @@ export default function ActivityForm({
     mutationFn: (data: CreateActivityFormData) =>
       updateActivity(activity!.id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       reset();
       onSuccess?.();
       toast.success("Activité mise à jour avec succès");
@@ -291,6 +295,11 @@ export default function ActivityForm({
         onImageChange={handleImageChange}
         onImageRemove={handleImageRemove}
         isUploading={isUploading}
+        locationValue={locationValue}
+        onLocationChange={(value) => {
+          setLocationValue(value);
+          setValue("location", value);
+        }}
       />
 
       {isEditing ? (

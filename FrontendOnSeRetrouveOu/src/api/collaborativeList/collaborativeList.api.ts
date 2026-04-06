@@ -1,9 +1,10 @@
+import { API_BASE_URL } from "@/config";
 import type {
   CollaborativeListItem,
   CreateCollaborativeListItemRequest,
 } from "@/types/collaborativeList";
 
-const API_URL = "http://localhost:8080/api/activities";
+const API_URL = `${API_BASE_URL}/activities`;
 
 export const fetchCollaborativeListItems = async (
   activityId: number,

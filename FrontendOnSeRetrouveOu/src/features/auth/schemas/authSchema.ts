@@ -10,12 +10,8 @@ export const registerSchema = z
     username: z
       .string()
       .min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères"),
-    firstname: z
-      .string()
-      .min(1, "Le prénom est obligatoire"),
-    lastname: z
-      .string()
-      .min(1, "Le nom est obligatoire"),
+    firstname: z.string().min(1, "Le prénom est obligatoire"),
+    lastname: z.string().min(1, "Le nom est obligatoire"),
     email: z
       .string()
       .min(1, "L'email est obligatoire")
@@ -28,7 +24,7 @@ export const registerSchema = z
       .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
       .regex(
         /[@$!%*?&]/,
-        "Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)"
+        "Le mot de passe doit contenir au moins un caractère spécial (@$!%*?&)",
       ),
     confirmPassword: z.string().min(1, "Veuillez confirmer votre mot de passe"),
   })

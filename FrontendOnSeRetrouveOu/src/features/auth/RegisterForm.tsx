@@ -28,7 +28,10 @@ export default function RegisterForm() {
         navigate("/login");
       },
       onError: (error: Error) => {
-        toast.error(error?.message || "Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
+        toast.error(
+          error?.message ||
+            "Une erreur est survenue lors de l'inscription. Veuillez réessayer.",
+        );
       },
     });
   };
@@ -82,9 +85,7 @@ export default function RegisterForm() {
                 placeholder="votre@email.com"
               />
               {errors.email && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 

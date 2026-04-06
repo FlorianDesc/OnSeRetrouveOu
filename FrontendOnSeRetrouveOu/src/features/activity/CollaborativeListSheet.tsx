@@ -1,4 +1,11 @@
 import {
+  addCollaborativeListItem,
+  deleteCollaborativeListItem,
+  fetchCollaborativeListItems,
+  updateCollaborativeListItem,
+} from "@/api/collaborativeList/collaborativeList.api";
+import { collaborativeListKeys } from "@/api/collaborativeList/collaborativeList.queries";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -35,12 +42,6 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import {
-  addCollaborativeListItem,
-  deleteCollaborativeListItem,
-  fetchCollaborativeListItems,
-  updateCollaborativeListItem,
-} from "./api/collaborativeListApi";
 import type { CollaborativeListItemFormData } from "./schemas/collaborativeListSchema";
 
 type CollaborativeListSheetProps = {
@@ -75,7 +76,7 @@ export default function CollaborativeListSheet({
   });
 
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["collaborativeList", activity.id],
+    queryKey: collaborativeListKeys.list(activity.id),
     queryFn: () => fetchCollaborativeListItems(activity.id),
     enabled: isOpen,
   });
@@ -85,7 +86,7 @@ export default function CollaborativeListSheet({
       addCollaborativeListItem(activity.id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["collaborativeList", activity.id],
+        queryKey: collaborativeListKeys.list(activity.id),
       });
       form.reset();
       toast.success("Élément ajouté avec succès");
@@ -100,7 +101,7 @@ export default function CollaborativeListSheet({
       deleteCollaborativeListItem(activity.id, itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["collaborativeList", activity.id],
+        queryKey: collaborativeListKeys.list(activity.id),
       });
       toast.success("Élément supprimé avec succès");
     },
@@ -116,7 +117,7 @@ export default function CollaborativeListSheet({
     }) => updateCollaborativeListItem(activity.id, data.itemId, data.formData),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["collaborativeList", activity.id],
+        queryKey: collaborativeListKeys.list(activity.id),
       });
       form.reset();
       setEditingItemId(null);

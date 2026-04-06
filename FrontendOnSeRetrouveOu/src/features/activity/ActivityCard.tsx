@@ -1,3 +1,11 @@
+import {
+  deleteActivity,
+  registerToActivity,
+} from "@/api/activity/activity.api";
+import {
+  activityKeys,
+  activityParticipantsQueryOptions,
+} from "@/api/activity/activity.queries";
 import defaultImg from "@/assets/default-picture.jpg";
 import {
   AlertDialog,
@@ -45,12 +53,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  deleteActivity,
-  fetchActivityParticipants,
-  registerToActivity,
-} from "./api/activityApi";
 import CollaborativeListSheet from "./CollaborativeListSheet";
+import { ActivityMapModal } from "./components/ActivityMapModal";
 import { activityImages } from "./constants/activityImages";
 import ActivityForm from "./CreateActivityForm";
 
@@ -67,6 +71,7 @@ export default function ActivityCard({
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCollaborativeListOpen, setIsCollaborativeListOpen] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const formattedDate = new Date(activity.dateActivity).toLocaleDateString(
@@ -84,8 +89,7 @@ export default function ActivityCard({
   const isCreator = currentUser && activity.creator?.id === currentUser.id;
 
   const { data: participants, isLoading: participantsLoading } = useQuery({
-    queryKey: ["participants", activity.id],
-    queryFn: () => fetchActivityParticipants(activity.id),
+    ...activityParticipantsQueryOptions(activity.id),
     enabled: isSheetOpen,
   });
 
@@ -93,9 +97,9 @@ export default function ActivityCard({
     mutationFn: () => registerToActivity(activity.id),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["participants", activity.id],
+        queryKey: activityKeys.participant(activity.id),
       });
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       setIsSheetOpen(true);
       toast.success("Vous avez été inscrit avec succès");
     },
@@ -107,7 +111,7 @@ export default function ActivityCard({
   const deleteMutation = useMutation({
     mutationFn: () => deleteActivity(activity.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       setIsDeleteDialogOpen(false);
       toast.success("Activité supprimée avec succès");
     },
@@ -186,10 +190,12 @@ export default function ActivityCard({
               </p>
 
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
-                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
-                  <MapPin className="size-4" />
+                <button
+                  onClick={() => setIsMapModalOpen(true)}
+                  className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word hover:text-blue-600 hover:underline transition-colors cursor-pointer">
+                  <MapPin className="size-4 shrink-0" />
                   {activity.location}
-                </span>
+                </button>
                 <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
                   <Calendar className="size-4" />
                   {formattedDate}
@@ -313,6 +319,12 @@ export default function ActivityCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ActivityMapModal
+        location={activity.location}
+        isOpen={isMapModalOpen}
+        onOpenChange={setIsMapModalOpen}
+      />
     </Card>
   );
 }

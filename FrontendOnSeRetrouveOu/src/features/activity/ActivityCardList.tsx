@@ -1,11 +1,9 @@
+import { activitiesQueryOptions } from "@/api/activity/activity.queries";
+import { currentUserQueryOptions } from "@/api/user/user.queries";
 import { Button } from "@/components/ui/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { fetchCurrentUser } from "../user/api/userApi";
 import ActivityCard from "./ActivityCard";
-import { fetchActivities } from "./api/activityApi";
-
-import type { User } from "@/types/user";
 
 type Props = {
   search?: string;
@@ -19,15 +17,11 @@ export default function ActivityCardList({ search, sort }: Props) {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [currentPage]);
 
-  const { data: currentUser } = useSuspenseQuery<User>({
-    queryKey: ["current-user"],
-    queryFn: fetchCurrentUser,
-  });
+  const { data: currentUser } = useSuspenseQuery(currentUserQueryOptions());
 
-  const { data } = useSuspenseQuery({
-    queryKey: ["activities", currentPage, search ?? null, sort ?? null],
-    queryFn: () => fetchActivities(currentPage, 10, sort, search),
-  });
+  const { data } = useSuspenseQuery(
+    activitiesQueryOptions(currentPage, 10, sort, search),
+  );
 
   const totalPages = data.totalPages;
   const currentActivities = data.content;
