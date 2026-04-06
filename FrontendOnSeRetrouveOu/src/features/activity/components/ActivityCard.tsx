@@ -1,3 +1,4 @@
+import { activityParticipantsQueryOptions } from "@/api/activity/activity.queries";
 import defaultImg from "@/assets/default-picture.jpg";
 import {
   AlertDialog,
@@ -22,6 +23,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { UPLOADS_BASE_URL } from "@/lib/uploadApi";
 import type { Activity } from "@/types/activity";
 import type { User } from "@/types/user";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   Edit2,
@@ -71,6 +73,14 @@ export default function ActivityCard({
     ? `${UPLOADS_BASE_URL}/${activity.imageName}`
     : activityImages[activity.id] || defaultImg;
   const isCreator = currentUser && activity.creator?.id === currentUser.id;
+
+  const { data: participants = [] } = useQuery(
+    activityParticipantsQueryOptions(activity.id),
+  );
+
+  const isAlreadyRegistered = currentUser
+    ? participants.some((p) => p.id === currentUser.id)
+    : false;
 
   const registerMutation = useRegisterToActivity(activity.id, () => {
     setIsSheetOpen(true);
@@ -175,12 +185,18 @@ export default function ActivityCard({
                 className="w-full"
                 variant="outline"
                 onClick={() => registerMutation.mutate()}
-                disabled={isCreator || registerMutation.isPending}>
+                disabled={
+                  isCreator || isAlreadyRegistered || registerMutation.isPending
+                }>
                 {registerMutation.isPending ? (
                   <div className="flex items-center justify-center gap-2">
                     <Spinner className="text-current h-4 w-4" />
                     <span>Inscription...</span>
                   </div>
+                ) : isCreator ? (
+                  "Vous êtes l'organisateur"
+                ) : isAlreadyRegistered ? (
+                  "Déjà inscrit"
                 ) : (
                   "S'inscrire"
                 )}
