@@ -11,6 +11,8 @@ public class CollaborativeListItemRequest {
 
     private CollaborativeListItemStatus status;
 
+    private Long assignedUserId;
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
@@ -19,4 +21,7 @@ public class CollaborativeListItemRequest {
 
     public CollaborativeListItemStatus getStatus() { return status; }
     public void setStatus(CollaborativeListItemStatus status) { this.status = status; }
+
+    public Long getAssignedUserId() { return assignedUserId; }
+    public void setAssignedUserId(Long assignedUserId) { this.assignedUserId = assignedUserId; }
 }
