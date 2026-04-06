@@ -13,6 +13,6 @@ export const addressesQueryOptions = (query: string) =>
   queryOptions({
     queryKey: addressKeys.search(query),
     queryFn: () => searchAddressesApi(query),
-    enabled: query.length >= 2,
+    enabled: query.length >= 3,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

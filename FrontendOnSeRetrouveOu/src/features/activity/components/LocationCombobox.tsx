@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 type LocationComboboxProps = {
@@ -25,11 +25,14 @@ export function LocationCombobox({
 
   // Validating query: must be >= 3 chars and start with letter or number
   const isValidQuery = (query: string) => {
-    return query.length >= 3 && /^[a-zA-Z0-9]/.test(query);
+    const trimmed = query.trim();
+    return trimmed.length >= 3 && /^[a-zA-Z0-9]/.test(trimmed);
   };
 
-  const { data: addresses, isLoading } = useSuspenseQuery(
-    addressesQueryOptions(isValidQuery(debouncedSearch) ? debouncedSearch : ""),
+  const { data: addresses = [], isLoading } = useQuery(
+    addressesQueryOptions(
+      isValidQuery(debouncedSearch) ? debouncedSearch.trim() : "",
+    ),
   );
 
   // Close dropdown when clicking outside

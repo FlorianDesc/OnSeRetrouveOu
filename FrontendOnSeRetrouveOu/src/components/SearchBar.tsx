@@ -11,8 +11,12 @@ export default function SearchBar({
   onChange,
   placeholder = "Rechercher...",
 }: SearchBarProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+  };
+
   return (
-    <div className="relative w-full max-w-md">
+    <form onSubmit={handleSubmit} className="relative w-full max-w-md">
       <svg
         className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
         xmlns="http://www.w3.org/2000/svg"
@@ -30,9 +34,14 @@ export default function SearchBar({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+          }
+        }}
         placeholder={placeholder}
         className="pl-10"
       />
-    </div>
+    </form>
   );
 }

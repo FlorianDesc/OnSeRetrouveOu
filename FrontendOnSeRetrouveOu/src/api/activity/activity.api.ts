@@ -36,8 +36,11 @@ export const fetchActivities = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -65,8 +68,11 @@ export const fetchActivityParticipants = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -92,8 +98,11 @@ export const createActivity = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -121,8 +130,11 @@ export const registerToActivity = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -162,8 +174,11 @@ export const updateActivity = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -189,8 +204,11 @@ export const deleteActivity = async (activityId: number): Promise<void> => {
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {

@@ -21,8 +21,11 @@ export const uploadImage = async (file: File): Promise<UploadResponse> => {
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {

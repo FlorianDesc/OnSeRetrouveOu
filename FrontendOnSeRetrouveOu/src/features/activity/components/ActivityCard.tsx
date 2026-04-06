@@ -1,11 +1,3 @@
-import {
-  deleteActivity,
-  registerToActivity,
-} from "@/api/activity/activity.api";
-import {
-  activityKeys,
-  activityParticipantsQueryOptions,
-} from "@/api/activity/activity.queries";
 import defaultImg from "@/assets/default-picture.jpg";
 import {
   AlertDialog,
@@ -17,7 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,19 +18,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
 import { UPLOADS_BASE_URL } from "@/lib/uploadApi";
-import { capitalizeFirstLetter } from "@/lib/utils";
 import type { Activity } from "@/types/activity";
 import type { User } from "@/types/user";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar,
   Edit2,
@@ -52,11 +34,14 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { activityImages } from "../constants/activityImages";
+import { useDeleteActivity } from "../hooks/useDeleteActivity";
+import { useRegisterToActivity } from "../hooks/useRegisterToActivity";
+
+import { ActivityMapModal } from "./ActivityMapModal";
 import CollaborativeListSheet from "./CollaborativeListSheet";
-import { ActivityMapModal } from "./components/ActivityMapModal";
-import { activityImages } from "./constants/activityImages";
-import ActivityForm from "./CreateActivityForm";
+import EditActivitySheet from "./EditActivitySheet";
+import ParticipantsSheet from "./ParticipantsSheet";
 
 type ActivityCardProps = {
   activity: Activity;
@@ -72,7 +57,6 @@ export default function ActivityCard({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCollaborativeListOpen, setIsCollaborativeListOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
-  const queryClient = useQueryClient();
 
   const formattedDate = new Date(activity.dateActivity).toLocaleDateString(
     "fr-FR",
@@ -88,44 +72,13 @@ export default function ActivityCard({
     : activityImages[activity.id] || defaultImg;
   const isCreator = currentUser && activity.creator?.id === currentUser.id;
 
-  const { data: participants, isLoading: participantsLoading } = useQuery({
-    ...activityParticipantsQueryOptions(activity.id),
-    enabled: isSheetOpen,
+  const registerMutation = useRegisterToActivity(activity.id, () => {
+    setIsSheetOpen(true);
   });
 
-  const registerMutation = useMutation({
-    mutationFn: () => registerToActivity(activity.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: activityKeys.participant(activity.id),
-      });
-      queryClient.invalidateQueries({ queryKey: activityKeys.all });
-      setIsSheetOpen(true);
-      toast.success("Vous avez été inscrit avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error?.message || "Erreur lors de l'inscription");
-    },
+  const deleteMutation = useDeleteActivity(() => {
+    setIsDeleteDialogOpen(false);
   });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deleteActivity(activity.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: activityKeys.all });
-      setIsDeleteDialogOpen(false);
-      toast.success("Activité supprimée avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error?.message || "Erreur lors de la suppression");
-    },
-  });
-
-  const participantList = participants || [];
-
-  const getInitial = (user: User) => {
-    const fallback = user.firstname?.[0] || user.lastname?.[0] || "?";
-    return (user.username?.[0] || fallback || "?").toUpperCase();
-  };
 
   return (
     <Card className="w-full overflow-hidden p-0">
@@ -185,30 +138,34 @@ export default function ActivityCard({
           </CardHeader>
           <CardContent className="space-y-0 pt-0 flex flex-col h-full">
             <div className="flex-1 flex flex-col justify-start">
-              <p className="text-sm text-gray-600 mb-3">
+              <p className="text-sm text-gray-600 mb-3 truncate max-w-xs">
                 {activity.description}
               </p>
 
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600">
                 <button
                   onClick={() => setIsMapModalOpen(true)}
-                  className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word hover:text-blue-600 hover:underline transition-colors cursor-pointer">
+                  className="flex items-center gap-2 min-w-0 hover:text-blue-600 hover:underline transition-colors cursor-pointer">
                   <MapPin className="size-4 shrink-0" />
-                  {activity.location}
+                  <span className="truncate">{activity.location}</span>
                 </button>
-                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
-                  <Calendar className="size-4" />
-                  {formattedDate}
+                <span className="flex items-center gap-2 min-w-0">
+                  <Calendar className="size-4 shrink-0" />
+                  <span className="truncate">{formattedDate}</span>
                 </span>
 
-                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
-                  <UserIcon className="size-4" />
-                  Créé par {activity.creator.firstname}{" "}
-                  {activity.creator.lastname}
+                <span className="flex items-center gap-2 min-w-0">
+                  <UserIcon className="size-4 shrink-0" />
+                  <span className="truncate">
+                    Créé par {activity.creator.firstname}{" "}
+                    {activity.creator.lastname}
+                  </span>
                 </span>
-                <span className="flex items-start gap-2 min-w-0 whitespace-normal wrap-break-word">
-                  <Users className="size-4" />
-                  {activity.maxParticipants} participants
+                <span className="flex items-center gap-2 min-w-0">
+                  <Users className="size-4 shrink-0" />
+                  <span className="truncate">
+                    {activity.maxParticipants} participants
+                  </span>
                 </span>
               </div>
             </div>
@@ -221,76 +178,38 @@ export default function ActivityCard({
                 disabled={isCreator || registerMutation.isPending}>
                 {registerMutation.isPending ? (
                   <div className="flex items-center justify-center gap-2">
-                    <Spinner className="text-current" />
-                    <span className="sr-only">Inscription...</span>
+                    <Spinner className="text-current h-4 w-4" />
+                    <span>Inscription...</span>
                   </div>
                 ) : (
                   "S'inscrire"
                 )}
               </Button>
 
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent side="right">
-                  <SheetHeader>
-                    <SheetTitle>Participants</SheetTitle>
-                    <p className="text-sm text-gray-600">
-                      {participantList.length} participant(s)
-                    </p>
-                  </SheetHeader>
-                  <div className="px-4 pb-4 space-y-0 overflow-y-auto">
-                    {participantsLoading && (
-                      <p className="text-sm text-gray-600">Chargement...</p>
-                    )}
+              {isSheetOpen && (
+                <ParticipantsSheet
+                  activityId={activity.id}
+                  isOpen={isSheetOpen}
+                  onOpenChange={setIsSheetOpen}
+                />
+              )}
 
-                    {!participantsLoading && participantList.length === 0 && (
-                      <p className="text-sm text-gray-600">
-                        Aucun participant pour le moment
-                      </p>
-                    )}
+              {isEditSheetOpen && (
+                <EditActivitySheet
+                  activity={activity}
+                  isOpen={isEditSheetOpen}
+                  onOpenChange={setIsEditSheetOpen}
+                />
+              )}
 
-                    {!participantsLoading &&
-                      participantList.map((participant, index) => (
-                        <div key={participant.id}>
-                          <div className="flex items-center gap-3 px-1 py-1.5">
-                            <Avatar>
-                              <AvatarFallback>
-                                {getInitial(participant)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="text-sm text-gray-800">
-                              {capitalizeFirstLetter(participant.firstname)}{" "}
-                              {capitalizeFirstLetter(participant.lastname)}
-                            </div>
-                          </div>
-                          {index < participantList.length - 1 && (
-                            <Separator className="my-2 bg-gray-200" />
-                          )}
-                        </div>
-                      ))}
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-                <SheetContent side="right">
-                  <SheetHeader>
-                    <SheetTitle>Modifier l'activité</SheetTitle>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <ActivityForm
-                      activity={activity}
-                      onSuccess={() => setIsEditSheetOpen(false)}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <CollaborativeListSheet
-                activity={activity}
-                isOpen={isCollaborativeListOpen}
-                onOpenChange={setIsCollaborativeListOpen}
-                currentUserId={currentUser?.id}
-              />
+              {isCollaborativeListOpen && (
+                <CollaborativeListSheet
+                  activity={activity}
+                  isOpen={isCollaborativeListOpen}
+                  onOpenChange={setIsCollaborativeListOpen}
+                  currentUserId={currentUser?.id}
+                />
+              )}
             </div>
           </CardContent>
         </div>
@@ -313,7 +232,7 @@ export default function ActivityCard({
             <AlertDialogAction
               className="bg-red-600 text-white hover:bg-red-700"
               disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate()}>
+              onClick={() => deleteMutation.mutate(activity.id)}>
               {deleteMutation.isPending ? "Suppression..." : "Supprimer"}
             </AlertDialogAction>
           </AlertDialogFooter>

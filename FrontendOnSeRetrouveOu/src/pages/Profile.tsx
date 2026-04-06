@@ -1,5 +1,4 @@
-import { updatePassword, updateProfile } from "@/api/user/user.api";
-import { currentUserQueryOptions, userKeys } from "@/api/user/user.queries";
+import { currentUserQueryOptions } from "@/api/user/user.queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,14 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUpdatePassword } from "@/features/auth/hooks/useUpdatePassword";
+import { useUpdateProfile } from "@/features/auth/hooks/useUpdateProfile";
+import { useUploadProfileImage } from "@/features/auth/hooks/useUploadProfileImage";
+import { UPLOADS_BASE_URL } from "@/lib/uploadApi";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function Profile() {
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -38,47 +39,20 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { data: user, isLoading } = useQuery(currentUserQueryOptions());
+  const { data: user } = useSuspenseQuery(currentUserQueryOptions());
 
-  const profileMutation = useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.current() });
-      setIsEditingProfile(false);
-      toast.success("Profil mis à jour avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
+  const profileMutation = useUpdateProfile(() => {
+    setIsEditingProfile(false);
   });
 
-  const passwordMutation = useMutation({
-    mutationFn: updatePassword,
-    onSuccess: () => {
-      setIsEditingPassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      toast.success("Mot de passe mis à jour avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
+  const passwordMutation = useUpdatePassword(() => {
+    setIsEditingPassword(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   });
 
-  const imageMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const result = await uploadImage(file);
-      return updateProfile({ profileImage: result.fileName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.current() });
-      toast.success("Photo de profil mise à jour");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
+  const imageMutation = useUploadProfileImage();
 
   const handleEditProfile = () => {
     if (user) {
@@ -128,14 +102,6 @@ export default function Profile() {
       (first + last).toUpperCase() || user.username?.[0]?.toUpperCase() || "?"
     );
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spinner className="size-8" />
-      </div>
-    );
-  }
 
   if (!user) {
     return (
