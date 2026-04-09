@@ -31,7 +31,9 @@ export default function ActivityCardList({ search, sort }: Props) {
       {currentActivities.length === 0 ? (
         <div className="rounded-lg p-12 text-center">
           <p className="text-sm text-gray-600 font-medium">Aucune activité</p>
-          <p className="text-xs text-gray-400 mt-1">Créez ou rejoignez une activité pour commencer</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Créez ou rejoignez une activité pour commencer
+          </p>
         </div>
       ) : (
         <>
@@ -64,7 +66,10 @@ export default function ActivityCardList({ search, sort }: Props) {
                 </Button>
               )}
 
-              <Button variant="default" size="icon" className="pointer-events-none">
+              <Button
+                variant="default"
+                size="icon"
+                className="pointer-events-none">
                 {currentPage + 1}
               </Button>
 
