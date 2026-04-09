@@ -1,23 +1,27 @@
+import { currentUserQueryOptions } from "@/api/user/user.queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  fetchCurrentUser,
-  updatePassword,
-  updateProfile,
-} from "@/features/user/api/userApi";
-import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useUpdatePassword } from "@/features/auth/hooks/useUpdatePassword";
+import { useUpdateProfile } from "@/features/auth/hooks/useUpdateProfile";
+import { useUploadProfileImage } from "@/features/auth/hooks/useUploadProfileImage";
+import { UPLOADS_BASE_URL } from "@/lib/uploadApi";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function Profile() {
-  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -35,50 +39,20 @@ export default function Profile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: ["current-user"],
-    queryFn: fetchCurrentUser,
+  const { data: user } = useSuspenseQuery(currentUserQueryOptions());
+
+  const profileMutation = useUpdateProfile(() => {
+    setIsEditingProfile(false);
   });
 
-  const profileMutation = useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["current-user"] });
-      setIsEditingProfile(false);
-      toast.success("Profil mis à jour avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
+  const passwordMutation = useUpdatePassword(() => {
+    setIsEditingPassword(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   });
 
-  const passwordMutation = useMutation({
-    mutationFn: updatePassword,
-    onSuccess: () => {
-      setIsEditingPassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      toast.success("Mot de passe mis à jour avec succès");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const imageMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const result = await uploadImage(file);
-      return updateProfile({ profileImage: result.fileName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["current-user"] });
-      toast.success("Photo de profil mise à jour");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
+  const imageMutation = useUploadProfileImage();
 
   const handleEditProfile = () => {
     if (user) {
@@ -124,16 +98,10 @@ export default function Profile() {
     if (!user) return "?";
     const first = user.firstname?.[0] || "";
     const last = user.lastname?.[0] || "";
-    return (first + last).toUpperCase() || user.username?.[0]?.toUpperCase() || "?";
-  };
-
-  if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <Spinner className="size-8" />
-      </div>
+      (first + last).toUpperCase() || user.username?.[0]?.toUpperCase() || "?"
     );
-  }
+  };
 
   if (!user) {
     return (
@@ -156,12 +124,16 @@ export default function Profile() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <div className="relative group cursor-pointer" onClick={handleImageClick}>
+          <div
+            className="relative group cursor-pointer"
+            onClick={handleImageClick}>
             <Avatar className="size-32">
               {user.profileImage ? (
                 <AvatarImage src={`${UPLOADS_BASE_URL}/${user.profileImage}`} />
               ) : null}
-              <AvatarFallback className="text-3xl">{getInitials()}</AvatarFallback>
+              <AvatarFallback className="text-3xl">
+                {getInitials()}
+              </AvatarFallback>
             </Avatar>
             <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               {imageMutation.isPending ? (
@@ -230,14 +202,12 @@ export default function Profile() {
                 <Button
                   variant="outline"
                   onClick={() => setIsEditingProfile(false)}
-                  disabled={profileMutation.isPending}
-                >
+                  disabled={profileMutation.isPending}>
                   Annuler
                 </Button>
                 <Button
                   onClick={handleSaveProfile}
-                  disabled={profileMutation.isPending}
-                >
+                  disabled={profileMutation.isPending}>
                   {profileMutation.isPending ? (
                     <>
                       <Spinner className="mr-2 size-4" />
@@ -263,7 +233,9 @@ export default function Profile() {
               </div>
               <Separator />
               <div>
-                <p className="text-sm text-muted-foreground">Nom d'utilisateur</p>
+                <p className="text-sm text-muted-foreground">
+                  Nom d'utilisateur
+                </p>
                 <p className="font-medium">{user.username}</p>
               </div>
               <Separator />
@@ -292,12 +264,12 @@ export default function Profile() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Mot de passe</CardTitle>
-            <CardDescription>
-              Modifiez votre mot de passe
-            </CardDescription>
+            <CardDescription>Modifiez votre mot de passe</CardDescription>
           </div>
           {!isEditingPassword && (
-            <Button variant="outline" onClick={() => setIsEditingPassword(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditingPassword(true)}>
               Modifier
             </Button>
           )}
@@ -316,9 +288,12 @@ export default function Profile() {
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                  {showCurrentPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -334,14 +309,19 @@ export default function Profile() {
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  onClick={() => setShowNewPassword(!showNewPassword)}>
+                  {showNewPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+              <Label htmlFor="confirmPassword">
+                Confirmer le nouveau mot de passe
+              </Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
@@ -352,9 +332,12 @@ export default function Profile() {
                 <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  {showConfirmPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -367,14 +350,12 @@ export default function Profile() {
                   setNewPassword("");
                   setConfirmPassword("");
                 }}
-                disabled={passwordMutation.isPending}
-              >
+                disabled={passwordMutation.isPending}>
                 Annuler
               </Button>
               <Button
                 onClick={handleSavePassword}
-                disabled={passwordMutation.isPending}
-              >
+                disabled={passwordMutation.isPending}>
                 {passwordMutation.isPending ? (
                   <>
                     <Spinner className="mr-2 size-4" />

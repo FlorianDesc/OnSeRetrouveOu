@@ -1,9 +1,10 @@
+import { API_BASE_URL } from "@/config";
 import type {
   CollaborativeListItem,
   CreateCollaborativeListItemRequest,
 } from "@/types/collaborativeList";
 
-const API_URL = "http://localhost:8080/api/activities";
+const API_URL = `${API_BASE_URL}/activities`;
 
 export const fetchCollaborativeListItems = async (
   activityId: number,
@@ -23,8 +24,11 @@ export const fetchCollaborativeListItems = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -55,8 +59,11 @@ export const addCollaborativeListItem = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -91,8 +98,11 @@ export const updateCollaborativeListItem = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -124,8 +134,11 @@ export const deleteCollaborativeListItem = async (
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {

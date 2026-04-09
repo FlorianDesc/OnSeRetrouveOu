@@ -1,6 +1,7 @@
+import { API_BASE_URL } from "@/config";
 import type { User } from "@/types/user";
 
-const API_URL = "http://localhost:8080/api/users";
+const API_URL = `${API_BASE_URL}/users`;
 
 export type UpdateProfileData = {
   firstname?: string;
@@ -31,8 +32,11 @@ export const fetchCurrentUser = async (): Promise<User> => {
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -60,8 +64,11 @@ export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {
@@ -72,7 +79,9 @@ export const updateProfile = async (data: UpdateProfileData): Promise<User> => {
   return response.json();
 };
 
-export const updatePassword = async (data: UpdatePasswordData): Promise<void> => {
+export const updatePassword = async (
+  data: UpdatePasswordData,
+): Promise<void> => {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -90,8 +99,11 @@ export const updatePassword = async (data: UpdatePasswordData): Promise<void> =>
 
   if (response.status === 401 || response.status === 403) {
     localStorage.removeItem("token");
-    window.location.href = "/login";
-    throw new Error("Session expirée");
+    const event = new CustomEvent("unauthorized", {
+      detail: { code: "UNAUTHORIZED" },
+    });
+    window.dispatchEvent(event);
+    throw new Error("UNAUTHORIZED");
   }
 
   if (!response.ok) {

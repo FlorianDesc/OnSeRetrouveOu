@@ -1,16 +1,16 @@
 import SearchBar from "@/components/SearchBar";
-import { Spinner } from "@/components/ui/spinner";
-import ActivityCardList from "@/features/activity/ActivityCardList";
-import CreateActivityForm from "@/features/activity/CreateActivityForm";
-import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Spinner } from "@/components/ui/spinner";
+import ActivityCardList from "@/features/activity/components/ActivityCardList";
+import CreateActivitySheet from "@/features/activity/components/CreateActivitySheet";
+import { Suspense, useState } from "react";
 
 export default function Activity() {
   const [search, setSearch] = useState("");
@@ -64,7 +64,7 @@ export default function Activity() {
         </div>
 
         <div>
-          <CreateActivityForm />
+          <CreateActivitySheet />
         </div>
       </div>
 

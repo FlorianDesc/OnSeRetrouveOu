@@ -1,4 +1,4 @@
-import { login, register } from "@/features/auth/api/authApi";
+import { login, register } from "@/api/auth/auth.api";
 import { useMutation } from "@tanstack/react-query";
 
 export function useAuth() {

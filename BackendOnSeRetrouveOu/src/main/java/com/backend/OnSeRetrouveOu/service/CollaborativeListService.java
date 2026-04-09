@@ -1,5 +1,9 @@
 package com.backend.OnSeRetrouveOu.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.backend.OnSeRetrouveOu.dto.CollaborativeListItemRequest;
 import com.backend.OnSeRetrouveOu.model.Activity;
 import com.backend.OnSeRetrouveOu.model.CollaborativeListItem;
@@ -8,10 +12,8 @@ import com.backend.OnSeRetrouveOu.model.User;
 import com.backend.OnSeRetrouveOu.repository.ActivityRepository;
 import com.backend.OnSeRetrouveOu.repository.CollaborativeListItemRepository;
 import com.backend.OnSeRetrouveOu.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
@@ -50,6 +52,7 @@ public class CollaborativeListService {
 
         CollaborativeListItem item = new CollaborativeListItem();
         item.setActivity(activity);
+        item.setCreator(currentUser);
         item.setTitle(request.getTitle());
         item.setBringText(request.getBringText());
         item.setStatus(request.getStatus() != null

@@ -2,21 +2,11 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
 import type { Activity } from "@/types/activity";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, ImageIcon, XIcon } from "lucide-react";
+import { ImageIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Controller,
@@ -26,12 +16,13 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { toast } from "sonner";
-import { createActivity, updateActivity } from "./api/activityApi";
-import { uploadImage, UPLOADS_BASE_URL } from "@/lib/uploadApi";
+import { useCreateActivity } from "../hooks/useCreateActivity";
+import { useUpdateActivity } from "../hooks/useUpdateActivity";
 import {
   createActivitySchema,
   type CreateActivityFormData,
-} from "./schemas/activitySchema";
+} from "../schemas/activitySchema";
+import { LocationCombobox } from "./LocationCombobox";
 
 type ActivityFormProps = {
   activity?: Activity;
@@ -46,6 +37,8 @@ type FormFieldsProps = {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImageRemove: () => void;
   isUploading: boolean;
+  locationValue: string;
+  onLocationChange: (value: string) => void;
 };
 
 const FormFields = ({
@@ -54,6 +47,8 @@ const FormFields = ({
   errors,
   imagePreview,
   onImageChange,
+  locationValue,
+  onLocationChange,
   onImageRemove,
   isUploading,
 }: FormFieldsProps) => (
@@ -78,15 +73,11 @@ const FormFields = ({
       )}
     </div>
 
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="location">
-        Lieu<span className="text-red-500">*</span>
-      </Label>
-      <Input id="location" {...register("location")} />
-      {errors.location && (
-        <p className="text-sm text-red-500">{errors.location.message}</p>
-      )}
-    </div>
+    <LocationCombobox
+      value={locationValue}
+      onChange={onLocationChange}
+      error={errors.location?.message}
+    />
 
     <div className="flex flex-col gap-2">
       <Label htmlFor="dateActivity">
@@ -170,11 +161,23 @@ export default function ActivityForm({
   activity,
   onSuccess,
 }: ActivityFormProps) {
-  const [open, setOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const queryClient = useQueryClient();
+  const [locationValue, setLocationValue] = useState("");
   const isEditing = !!activity;
+
+  const createMutation = useCreateActivity(() => {
+    reset();
+    setImagePreview(null);
+    onSuccess?.();
+  });
+
+  const updateMutation = useUpdateActivity(activity?.id || 0, () => {
+    reset();
+    onSuccess?.();
+  });
+
+  const mutation = isEditing ? updateMutation : createMutation;
 
   const {
     register,
@@ -200,6 +203,7 @@ export default function ActivityForm({
       setValue("title", activity.title);
       setValue("description", activity.description);
       setValue("location", activity.location);
+      setLocationValue(activity.location);
       setValue("dateActivity", activity.dateActivity);
       setValue("maxParticipants", activity.maxParticipants || undefined);
       setValue("imageName", activity.imageName || undefined);
@@ -241,38 +245,6 @@ export default function ActivityForm({
     setValue("imageName", undefined);
   };
 
-  const createMutation = useMutation({
-    mutationFn: createActivity,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
-      reset();
-      setImagePreview(null);
-      setOpen(false);
-      toast.success("Activité créée avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error creating activity:", error);
-      toast.error("Erreur lors de la création de l'activité");
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: CreateActivityFormData) =>
-      updateActivity(activity!.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["activities"] });
-      reset();
-      onSuccess?.();
-      toast.success("Activité mise à jour avec succès");
-    },
-    onError: (error: Error) => {
-      console.error("Error updating activity:", error);
-      toast.error(error.message || "Erreur lors de la mise à jour");
-    },
-  });
-
-  const mutation = isEditing ? updateMutation : createMutation;
-
   const onSubmit = (data: CreateActivityFormData) => {
     const cleanedData = {
       ...data,
@@ -291,83 +263,37 @@ export default function ActivityForm({
         onImageChange={handleImageChange}
         onImageRemove={handleImageRemove}
         isUploading={isUploading}
+        locationValue={locationValue}
+        onLocationChange={(value) => {
+          setLocationValue(value);
+          setValue("location", value);
+        }}
       />
 
-      {isEditing ? (
-        <div className="flex gap-2 mt-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            disabled={mutation.isPending}
-            onClick={() => onSuccess?.()}>
-            Annuler
-          </Button>
-          <Button
-            type="submit"
-            className="flex-1"
-            disabled={mutation.isPending}>
-            {mutation.isPending ? (
-              <>
-                <Spinner className="mr-2" />
-                Mise à jour...
-              </>
-            ) : (
-              "Enregistrer"
-            )}
-          </Button>
-        </div>
-      ) : (
-        <SheetFooter className="mt-4 flex gap-2 px-0">
-          <SheetClose asChild>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              disabled={mutation.isPending}>
-              Annuler
-            </Button>
-          </SheetClose>
-          <Button
-            type="submit"
-            className="flex-1"
-            disabled={mutation.isPending}>
-            {mutation.isPending ? (
-              <>
-                <Spinner className="mr-2" />
-                Création...
-              </>
-            ) : (
-              "Créer"
-            )}
-          </Button>
-        </SheetFooter>
-      )}
+      <div className="flex gap-2 mt-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          disabled={mutation.isPending}
+          onClick={() => onSuccess?.()}>
+          Annuler
+        </Button>
+        <Button type="submit" className="flex-1" disabled={mutation.isPending}>
+          {mutation.isPending ? (
+            <>
+              <Spinner className="mr-2" />
+              {isEditing ? "Mise à jour..." : "Création..."}
+            </>
+          ) : isEditing ? (
+            "Enregistrer"
+          ) : (
+            "Créer"
+          )}
+        </Button>
+      </div>
     </form>
   );
 
-  if (isEditing) {
-    return <div className="p-6">{formContent}</div>;
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline">
-          Créer une activité
-          <PlusIcon className="h-4 w-4 ml-2" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="p-6">
-        <SheetHeader className="p-0">
-          <SheetTitle>Créer une activité</SheetTitle>
-          <SheetDescription>
-            Remplissez les informations pour créer une nouvelle activité
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="pt-6">{formContent}</div>
-      </SheetContent>
-    </Sheet>
-  );
+  return formContent;
 }
