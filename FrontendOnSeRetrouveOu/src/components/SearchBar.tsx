@@ -4,19 +4,21 @@ type SearchBarProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
 };
 
 export default function SearchBar({
   value,
   onChange,
   placeholder = "Rechercher...",
+  className = "",
 }: SearchBarProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative w-full max-w-md">
+    <form onSubmit={handleSubmit} className={`relative w-full ${className}`}>
       <svg
         className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
         xmlns="http://www.w3.org/2000/svg"

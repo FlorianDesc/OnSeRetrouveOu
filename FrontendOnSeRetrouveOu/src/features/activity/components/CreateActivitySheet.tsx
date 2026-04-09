@@ -11,17 +11,27 @@ import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import ActivityForm from "./ActivityForm";
 
-export default function CreateActivitySheet() {
+type CreateActivitySheetProps = {
+  buttonClassName?: string;
+  wrapperClassName?: string;
+};
+
+export default function CreateActivitySheet({
+  buttonClassName = "",
+  wrapperClassName = "",
+}: CreateActivitySheetProps) {
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button type="button" variant="outline">
-          Créer une activité
-          <PlusIcon className="h-4 w-4 ml-2" />
-        </Button>
-      </SheetTrigger>
+      <div className={wrapperClassName}>
+        <SheetTrigger asChild>
+          <Button type="button" variant="outline" className={buttonClassName}>
+            Créer une activité
+            <PlusIcon className="h-4 w-4 ml-2" />
+          </Button>
+        </SheetTrigger>
+      </div>
       <SheetContent className="flex flex-col p-0 h-full">
         <SheetHeader className="p-4 shrink-0">
           <SheetTitle>Créer une activité</SheetTitle>

@@ -33,17 +33,20 @@ export default function Activity() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <div className="flex-1 flex items-center gap-4">
+      <div className="mb-6 grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="grid grid-cols-2 gap-4 md:flex md:flex-row md:gap-4 md:items-center col-span-2 md:col-span-1">
           <SearchBar
             value={search}
             onChange={setSearch}
             placeholder="Rechercher une activité"
+            className="md:max-w-md"
           />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">Trier: {sortLabel(sort)}</Button>
+              <Button variant="outline" className="w-full md:w-auto">
+                Trier: {sortLabel(sort)}
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={8} className="w-48">
               <DropdownMenuLabel>Tri</DropdownMenuLabel>
@@ -63,9 +66,10 @@ export default function Activity() {
           </DropdownMenu>
         </div>
 
-        <div>
-          <CreateActivitySheet />
-        </div>
+        <CreateActivitySheet 
+          buttonClassName="w-full md:w-auto"
+          wrapperClassName="col-span-2 md:col-span-1"
+        />
       </div>
 
       <Suspense
