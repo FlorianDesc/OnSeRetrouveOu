@@ -30,7 +30,9 @@ CREATE TABLE collaborative_list_items (
   title VARCHAR(120) NOT NULL,
   bring_text TEXT,
   status VARCHAR(20) NOT NULL,
-  activity_id INTEGER NOT NULL REFERENCES activities(id)
+  activity_id INTEGER NOT NULL REFERENCES activities(id),
+  creator_id INTEGER NOT NULL REFERENCES users(id),
+  assigned_user_id INTEGER REFERENCES users(id)
 );
 
 /* A potentiellement rajouter : 

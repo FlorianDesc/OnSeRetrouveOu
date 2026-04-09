@@ -1,3 +1,4 @@
+import { activityParticipantsQueryOptions } from "@/api/activity/activity.queries";
 import { collaborativeListItemsQueryOptions } from "@/api/collaborativeList/collaborativeList.queries";
 import {
   AlertDialog,
@@ -9,7 +10,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,6 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -50,14 +57,12 @@ type CollaborativeListSheetProps = {
 };
 
 const statusLabels: Record<string, string> = {
-  A_APPORTER: "À apporter",
-  APPORTE: "Apporté",
   EN_ATTENTE: "En attente",
+  ASSIGNE: "Assigné",
 };
 
 function CollaborativeListContent({
   activity,
-  currentUserId,
 }: Omit<CollaborativeListSheetProps, "isOpen" | "onOpenChange">) {
   const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
@@ -66,12 +71,17 @@ function CollaborativeListContent({
     defaultValues: {
       title: "",
       bringText: "",
-      status: "A_APPORTER",
+      status: "EN_ATTENTE",
+      assignedUserId: null,
     },
   });
 
   const { data: items = [], isLoading } = useQuery(
     collaborativeListItemsQueryOptions(activity.id),
+  );
+
+  const { data: participants = [] } = useQuery(
+    activityParticipantsQueryOptions(activity.id),
   );
 
   const addItemMutation = useAddCollaborativeListItem(activity.id, () => {
@@ -84,12 +94,6 @@ function CollaborativeListContent({
     form.reset();
     setEditingItemId(null);
   });
-
-  const getInitials = (item: CollaborativeListItem) => {
-    const firstLetter = item.creator.firstname?.[0] || "";
-    const lastLetter = item.creator.lastname?.[0] || "";
-    return (firstLetter + lastLetter).toUpperCase() || "?";
-  };
 
   const onSubmit = (data: CollaborativeListItemFormData) => {
     if (editingItemId !== null) {
@@ -104,6 +108,12 @@ function CollaborativeListContent({
     form.setValue("title", item.title);
     form.setValue("bringText", item.bringText);
     form.setValue("status", item.status);
+    // Récupérer l'ID depuis assignedUserId ou depuis assignedUser.id
+    const assignedId = item.assignedUserId ?? item.assignedUser?.id ?? null;
+    form.setValue("assignedUserId", assignedId);
+    if (assignedId) {
+      form.setValue("status", "ASSIGNE");
+    }
   };
 
   const handleCancelEdit = () => {
@@ -182,38 +192,80 @@ function CollaborativeListContent({
                       <Button
                         type="button"
                         variant={
-                          field.value === "A_APPORTER" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => field.onChange("A_APPORTER")}
-                        disabled={addItemMutation.isPending}
-                        className="flex-1">
-                        À apporter
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
-                          field.value === "APPORTE" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => field.onChange("APPORTE")}
-                        disabled={addItemMutation.isPending}
-                        className="flex-1">
-                        Apporté
-                      </Button>
-                      <Button
-                        type="button"
-                        variant={
                           field.value === "EN_ATTENTE" ? "default" : "outline"
                         }
                         size="sm"
-                        onClick={() => field.onChange("EN_ATTENTE")}
-                        disabled={addItemMutation.isPending}
+                        onClick={() => {
+                          field.onChange("EN_ATTENTE");
+                          form.setValue("assignedUserId", null);
+                        }}
+                        disabled={
+                          addItemMutation.isPending ||
+                          editItemMutation.isPending
+                        }
                         className="flex-1">
                         En attente
                       </Button>
+                      <Button
+                        type="button"
+                        variant={
+                          field.value === "ASSIGNE" ? "default" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => field.onChange("ASSIGNE")}
+                        disabled={
+                          addItemMutation.isPending ||
+                          editItemMutation.isPending
+                        }
+                        className="flex-1">
+                        Assigné
+                      </Button>
                     </div>
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="assignedUserId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Personne à assignée</FormLabel>
+                  <Select
+                    value={field.value?.toString() ?? "none"}
+                    onValueChange={(value) =>
+                      field.onChange(value === "none" ? null : parseInt(value))
+                    }
+                    disabled={
+                      form.watch("status") === "EN_ATTENTE" ||
+                      addItemMutation.isPending ||
+                      editItemMutation.isPending
+                    }>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            form.watch("status") === "EN_ATTENTE"
+                              ? "Aucun"
+                              : "Sélectionner une personne"
+                          }
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">Aucun</SelectItem>
+                      {participants.map((participant) => (
+                        <SelectItem
+                          key={participant.id}
+                          value={participant.id.toString()}>
+                          {capitalizeFirstLetter(participant.firstname)}{" "}
+                          {capitalizeFirstLetter(participant.lastname)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -270,48 +322,41 @@ function CollaborativeListContent({
           <div className="space-y-2">
             {items.map((item, index) => (
               <div key={item.id}>
-                <div className="flex gap-3 py-2">
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className="text-xs font-semibold">
-                      {getInitials(item)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {capitalizeFirstLetter(item.creator.firstname)}{" "}
-                          {capitalizeFirstLetter(item.creator.lastname)}
-                        </p>
-                        <p className="text-sm text-gray-600 truncate">
-                          {item.title}
-                        </p>
-                      </div>
-                      {currentUserId === item.creator.id && (
-                        <div className="flex gap-1 shrink-0">
-                          <button
-                            onClick={() => handleEditItem(item)}
-                            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                            disabled={editItemMutation.isPending}>
-                            <Pencil className="size-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                            disabled={deleteItemMutation.isPending}>
-                            <Trash2 className="size-3.5" />
-                          </button>
-                        </div>
-                      )}
+                <div className="py-2 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">
+                        {item.title}
+                      </p>
+                      <p className="text-sm text-gray-600 truncate">
+                        {item.bringText}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500 line-clamp-2">
-                      {item.bringText}
-                    </p>
-                    <div className="pt-0.5">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                        {statusLabels[item.status]}
+                    <div className="flex gap-1 shrink-0">
+                      <button
+                        onClick={() => handleEditItem(item)}
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        disabled={editItemMutation.isPending}>
+                        <Pencil className="size-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        disabled={deleteItemMutation.isPending}>
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      {statusLabels[item.status]}
+                    </span>
+                    {item.assignedUser && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                        {capitalizeFirstLetter(item.assignedUser.firstname)}{" "}
+                        {capitalizeFirstLetter(item.assignedUser.lastname)}
                       </span>
-                    </div>
+                    )}
                   </div>
                 </div>
                 {index < items.length - 1 && (

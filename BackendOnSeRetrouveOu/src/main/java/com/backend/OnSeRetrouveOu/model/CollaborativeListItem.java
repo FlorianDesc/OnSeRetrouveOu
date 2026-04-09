@@ -1,6 +1,15 @@
 package com.backend.OnSeRetrouveOu.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
@@ -25,6 +34,9 @@ public class CollaborativeListItem {
     @JoinColumn(name = "activity_id", nullable = false)
     private Activity activity;
 
+    @ManyToOne
+    @JoinColumn(name = "creator_id", nullable = false)
+    private User creator;
 
     @ManyToOne
     @JoinColumn(name = "assigned_user_id")
