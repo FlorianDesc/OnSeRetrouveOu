@@ -36,7 +36,6 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
-import { activityImages } from "../constants/activityImages";
 import { useDeleteActivity } from "../hooks/useDeleteActivity";
 import { useRegisterToActivity } from "../hooks/useRegisterToActivity";
 
@@ -71,7 +70,7 @@ export default function ActivityCard({
 
   const activityImage = activity.imageName
     ? `${UPLOADS_BASE_URL}/${activity.imageName}`
-    : activityImages[activity.id] || defaultImg;
+    : defaultImg;
   const isCreator = currentUser && activity.creator?.id === currentUser.id;
 
   const { data: participants = [] } = useQuery(

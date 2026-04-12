@@ -15,6 +15,7 @@ import com.backend.OnSeRetrouveOu.model.Activity;
 import com.backend.OnSeRetrouveOu.model.ActivitySort;
 import com.backend.OnSeRetrouveOu.model.User;
 import com.backend.OnSeRetrouveOu.repository.ActivityRepository;
+import com.backend.OnSeRetrouveOu.repository.CollaborativeListItemRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class ActivityService {
     private final ActivityRepository activityRepository;
+    private final CollaborativeListItemRepository collaborativeListItemRepository;
 
     public Page<Activity> getAllActivities(int page, int size, ActivitySort order, String search){
 
@@ -91,6 +93,9 @@ public class ActivityService {
             throw new RuntimeException("You are not authorized to delete this activity");
         }
 
+        // Supprimer les items de la liste collaborative de l'activité
+        collaborativeListItemRepository.deleteByActivityId(activityId);
+        
         activity.getParticipants().clear();
         activityRepository.delete(activity);
     }
