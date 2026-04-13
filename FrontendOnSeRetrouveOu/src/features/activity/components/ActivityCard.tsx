@@ -90,7 +90,7 @@ export default function ActivityCard({
   });
 
   return (
-    <Card className="w-full overflow-hidden p-0">
+    <Card className="w-full overflow-hidden p-0 h-51">
       <div className="flex flex-row h-full">
         {activityImage && (
           <div className="w-[30%]">
