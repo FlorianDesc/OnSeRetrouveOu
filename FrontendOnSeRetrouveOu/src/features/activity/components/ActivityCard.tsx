@@ -102,8 +102,8 @@ export default function ActivityCard({
           </div>
         )}
         <div className="flex flex-col w-[70%] py-4 h-full">
-          <CardHeader className="pb-0 flex flex-row items-center justify-between">
-            <CardTitle className="text-xl font-semibold">
+          <CardHeader className="pb-0 flex flex-row items-center justify-between min-w-0">
+            <CardTitle className="text-xl font-semibold truncate max-w-xs">
               {activity.title}
             </CardTitle>
             <DropdownMenu>
